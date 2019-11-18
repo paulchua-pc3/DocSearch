@@ -1,0 +1,16 @@
+{
+    "name": "doc-search-using-azure-search",
+    "description": "Document Upload and Search using Azure Search",
+    "version": "0.0.1",
+    "private": true,
+    "license": "MIT",
+    "author": "Microsoft",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "express": "^4.17.1",
+        "dotenv": "^7.0.0",
+        "request": "^2.88.0"
+    }
+}
