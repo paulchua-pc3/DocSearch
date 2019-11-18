@@ -9,21 +9,20 @@ class SearchClient {
         this.apiVersion = searchConfig.apiVersion;
     }
 
-    //api call to run indexer, returns status code 204 on success
+    //api call to run indexer, returns status code 202 on success
     run_indexer() {
         var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/run?api-version=${this.apiVersion}`;
         
         var options = { 
-            "url" : url, 
+            "url" : url,            
             "headers" : {
-                'Content-Type' : 'application/json',
                 'api-key' : this.apiKey
             }
         };
 
         var requestPromise = new Promise(
             function (resolve) {
-                request.get(options, function (error, response, body) {
+                request.post(options, function (error, response, body) {
                     if (error){
                         console.log('error:', error);
                     }
@@ -43,7 +42,7 @@ class SearchClient {
     
         var query_encoded = encodeURIComponent(query);
         var options = { 
-            "url" : url+query_encoded, 
+            "url" : url+query_encoded,
             "headers" : {
                 'Content-Type' : 'application/json',
                 'api-key' : this.apiKey

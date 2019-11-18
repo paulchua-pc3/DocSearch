@@ -1,4 +1,6 @@
 const dotenv = require('dotenv');
+const { SearchClient } = require('./search_client');
+const path = require('path');
 
 const express = require('express');
 const app = express();
@@ -21,14 +23,19 @@ const searchConfig = {
     apiVersion: process.env.ApiVersion    
 };
 
-app.post('/indexer', (req, res) => {
-    const searchClient = new SearchClient(searchConfig);
-    var statusCode = await searchClient.run_indexer();
-    if (statusCode == "204"){
-        res.send(JSON.stringify({"result":"success"}));
-    }else{
-        res.send(JSON.stringify({"result":"error", "statusCode": statusCode}));
-    }    
+app.get('/indexer', async (req, res) => { //replace with post after, get for testing purposes only
+    try{
+        const searchClient = new SearchClient(searchConfig);
+        var statusCode = await searchClient.run_indexer();
+        if (statusCode == "202"){
+            res.send(JSON.stringify({"result":"success"}));
+        }else{
+            res.send(JSON.stringify({"result":"error", "statusCode": statusCode}));
+        }
+    } catch (error) {
+        // Passes errors from async searchClient call to error handler
+        return next(error)
+    }
 });
 
 const server = app.listen(process.env.PORT || 3000, function(){
