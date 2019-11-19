@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//app.use(express.static('public'));
+app.use(express.static('public'));
 
 // Import required service configuration.
 const ENV_FILE = path.join(__dirname, '.env');
@@ -26,26 +26,33 @@ const searchConfig = {
     apiVersion: process.env.ApiVersion
 };
 
-var settings = require('./settings.json');
-
-var storageAccount = settings.storageAccount;
-var accessKey = settings.accessKey;
-var containerName = settings.container;
-
-app.get('/indexer', async (req, res) => { //replace with post after, get for testing purposes only
+app.post('/indexer/run', async (req, res) => {
     try{
         const searchClient = new SearchClient(searchConfig);
-        var statusCode = await searchClient.run_indexer();
-        if (statusCode == "202"){
-            res.send(JSON.stringify({"result":"success"}));
-        }else{
-            res.send(JSON.stringify({"result":"error", "statusCode": statusCode}));
-        }
+        var result = await searchClient.run_indexer();
+        res.send(JSON.stringify(result));        
+    } catch (error) {
+        // Passes errors from async searchClient call to error handler
+        return next(error);
+    }
+});
+
+app.get('/indexer/status', async (req, res) => {
+    try{
+        const searchClient = new SearchClient(searchConfig);
+        var result = await searchClient.get_indexer_status();
+        res.send(JSON.stringify(result));        
     } catch (error) {
         // Passes errors from async searchClient call to error handler
         return next(error)
     }
 });
+
+var settings = require('./settings.json');
+
+var storageAccount = settings.storageAccount;
+var accessKey = settings.accessKey;
+var containerName = settings.container;
 
 app.get('/upload', function(req, res) {
     res.send(

@@ -9,7 +9,7 @@ class SearchClient {
         this.apiVersion = searchConfig.apiVersion;
     }
 
-    //api call to run indexer, returns status code 202 on success
+    //api call to run indexer, returns {result:"success"} on successful start
     run_indexer() {
         var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/run?api-version=${this.apiVersion}`;
         
@@ -28,7 +28,41 @@ class SearchClient {
                     }
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     //console.log('body:', body);
-                    resolve(response.statusCode);
+                    var result = {"result":"error"};
+                    var statusCode = response.statusCode;
+                    if (statusCode == "202"){
+                        result = {"result":"success"};
+                    }else{
+                        result = {"result":"error", "statusCode": statusCode};
+                    }
+                    resolve(result);
+                })
+            }
+        );
+        return requestPromise;   
+    }
+
+    //api call to get indexer status(success, running, error), returns indexer status json
+    get_indexer_status() {
+        var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/status?api-version=${this.apiVersion}`;
+        
+        var options = { 
+            "url" : url,            
+            "headers" : {
+                'Content-Type' : 'application/json',
+                'api-key' : this.apiKey
+            }
+        };
+
+        var requestPromise = new Promise(
+            function (resolve) {
+                request.get(options, function (error, response, body) {
+                    if (error){
+                        console.log('error:', error);
+                    }
+                    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    //console.log('body:', body);
+                    resolve(body);
                 })
             }
         );
