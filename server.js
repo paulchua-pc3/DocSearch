@@ -2,6 +2,9 @@ const dotenv = require('dotenv');
 const { SearchClient } = require('./search_client');
 const path = require('path');
 
+var azureStorage = require('azure-storage');
+var multiparty = require('multiparty');
+
 const express = require('express');
 const app = express();
 
@@ -20,8 +23,14 @@ const searchConfig = {
     apiKey: process.env.ApiKey,
     indexName: process.env.IndexName,
     indexerName: process.env.IndexerName,
-    apiVersion: process.env.ApiVersion    
+    apiVersion: process.env.ApiVersion
 };
+
+var settings = require('./settings.json');
+
+var storageAccount = settings.storageAccount;
+var accessKey = settings.accessKey;
+var containerName = settings.container;
 
 app.get('/indexer', async (req, res) => { //replace with post after, get for testing purposes only
     try{
@@ -36,6 +45,38 @@ app.get('/indexer', async (req, res) => { //replace with post after, get for tes
         // Passes errors from async searchClient call to error handler
         return next(error)
     }
+});
+
+app.get('/upload', function(req, res) {
+    res.send(
+    '<form action="/upload" method="post" enctype="multipart/form-data">' +
+    '<input type="file" name="snapshot" />' +
+    '<input type="submit" value="Upload" />' +
+    '</form>'
+  );
+});
+
+app.post('/upload', function (req, res) {
+  var container = containerName;    
+  var blobService = azureStorage.createBlobService(storageAccount, accessKey);
+  var form = new multiparty.Form();
+
+  form.on('part', function (part) {
+    if (part.filename) {
+      var size = part.byteCount;
+      var name = part.filename;
+
+      blobService.createBlockBlobFromStream(container, name, part, size, function (error) {
+        if (error) {
+          res.send(' Blob create: error ');
+        }
+      });
+    } else {
+      form.handlePart(part);
+    }
+  });
+  form.parse(req);
+  res.send('OK');
 });
 
 const server = app.listen(process.env.PORT || 3000, function(){
