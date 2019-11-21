@@ -4,6 +4,7 @@ const path = require('path');
 
 var azureStorage = require('azure-storage');
 var multiparty = require('multiparty');
+const upload = require('./routes/upload');
 
 const express = require('express');
 const app = express();
@@ -13,6 +14,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+
+app.use('/upload', upload);
+
+app.get("/", (req, res) => {
+  res.render("index");
+});
 
 // Import required service configuration.
 const ENV_FILE = path.join(__dirname, '.env');
@@ -46,44 +56,6 @@ app.get('/indexer/status', async (req, res) => {
         // Passes errors from async searchClient call to error handler
         return next(error)
     }
-});
-
-var settings = require('./settings.json');
-
-var storageAccount = settings.storageAccount;
-var accessKey = settings.accessKey;
-var containerName = settings.container;
-
-app.get('/upload', function(req, res) {
-    res.send(
-    '<form action="/upload" method="post" enctype="multipart/form-data">' +
-    '<input type="file" name="snapshot" />' +
-    '<input type="submit" value="Upload" />' +
-    '</form>'
-  );
-});
-
-app.post('/upload', function (req, res) {
-  var container = containerName;    
-  var blobService = azureStorage.createBlobService(storageAccount, accessKey);
-  var form = new multiparty.Form();
-
-  form.on('part', function (part) {
-    if (part.filename) {
-      var size = part.byteCount;
-      var name = part.filename;
-
-      blobService.createBlockBlobFromStream(container, name, part, size, function (error) {
-        if (error) {
-          res.send(' Blob create: error ');
-        }
-      });
-    } else {
-      form.handlePart(part);
-    }
-  });
-  form.parse(req);
-  res.send('OK');
 });
 
 const server = app.listen(process.env.PORT || 3000, function(){

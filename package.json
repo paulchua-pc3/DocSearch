@@ -10,9 +10,10 @@
     },
     "dependencies": {
         "azure-storage": "^2.10.3",
-        "express": "^4.17.1",
         "dotenv": "^7.0.0",
-        "request": "^2.88.0",
-        "multiparty": "^4.2.1"
+        "express": "^4.17.1",
+        "hbs": "^4.0.6",
+        "multiparty": "^4.2.1",
+        "request": "^2.88.0"
     }
 }

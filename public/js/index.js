@@ -3,8 +3,7 @@ $( document ).ready( function() {
 
     $("#updateIndex").click(function(){
         run_indexer();
-    });    
-
+    });
 });
 
 
