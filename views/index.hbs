@@ -26,10 +26,10 @@
                </div>
 
                <div class="col-4 p-4 m-0">
-                  <form action="/upload" method="post" enctype="multipart/form-data">
+                  <form id="upload-form" action="" method="" enctype="multipart/form-data">
                      <input type="file" name="snapshot" />
                      <button type="submit" class="btn btn-primary btn-sm" id="upload-btn">Upload</button>
-                     <p>{{message}}</p>
+                     <p id="upload-message"></p>
                   </form>
                </div>
             </div>
@@ -42,7 +42,7 @@
                        <h4></h4>
                    </div>
                  </div>
-               </div>
+            </div>
             <div class="row no-gutters">
                <h3>Results</h3>
                <span id="results"></span>

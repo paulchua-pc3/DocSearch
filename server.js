@@ -2,8 +2,6 @@ const dotenv = require('dotenv');
 const { SearchClient } = require('./search_client');
 const path = require('path');
 
-var azureStorage = require('azure-storage');
-var multiparty = require('multiparty');
 const upload = require('./routes/upload');
 
 const express = require('express');

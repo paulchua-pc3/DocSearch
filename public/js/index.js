@@ -4,6 +4,26 @@ $( document ).ready( function() {
     $("#updateIndex").click(function(){
         run_indexer();
     });
+    
+    $("#upload-form").submit(function(event){
+        event.preventDefault();
+        var formData = new FormData(this);
+        console.log(formData)
+        $.ajax({
+            type: "post",
+            url: "/upload",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(result){
+                console.log("result", result);
+                $("#upload-message").html(result);
+            },
+            error: function (error) {
+                console.log("error on upload:", error);                
+            }
+        });
+    });
 });
 
 
