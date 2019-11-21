@@ -35,14 +35,14 @@ class SearchClient {
                     }else{
                         result = {"result":"error", "statusCode": statusCode};
                     }
-                    resolve(result);
+                    resolve(JSON.stringify(result));
                 })
             }
         );
         return requestPromise;   
     }
 
-    //api call to get indexer status(success, running, error), returns indexer status json
+    //api call to get indexer status(reset, inProgress, success, error), returns indexer status json
     get_indexer_status() {
         var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/status?api-version=${this.apiVersion}`;
         
@@ -61,8 +61,18 @@ class SearchClient {
                         console.log('error:', error);
                     }
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                    //console.log('body:', body);
-                    resolve(body);
+                    //console.log('body:', body);                    
+                    var indexerStatus = "error";
+                    var jsonBody = JSON.parse(body);
+                    if (jsonBody.lastResult && jsonBody.lastResult.status){                       
+                        indexerStatus = jsonBody.lastResult.status;
+                        //treat reset the same as inProgress
+                        if (indexerStatus == "reset"){
+                            indexerStatus = "inProgress";
+                        }
+                    }
+                    var result = {"status":indexerStatus};
+                    resolve(JSON.stringify(result));
                 })
             }
         );

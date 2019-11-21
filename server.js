@@ -29,8 +29,8 @@ const searchConfig = {
 app.post('/indexer/run', async (req, res) => {
     try{
         const searchClient = new SearchClient(searchConfig);
-        var result = await searchClient.run_indexer();
-        res.send(JSON.stringify(result));        
+        var resultJsonString = await searchClient.run_indexer();
+        res.send(resultJsonString);        
     } catch (error) {
         // Passes errors from async searchClient call to error handler
         return next(error);
@@ -40,8 +40,8 @@ app.post('/indexer/run', async (req, res) => {
 app.get('/indexer/status', async (req, res) => {
     try{
         const searchClient = new SearchClient(searchConfig);
-        var result = await searchClient.get_indexer_status();
-        res.send(JSON.stringify(result));        
+        var resultJsonString = await searchClient.get_indexer_status();
+        res.send(resultJsonString);        
     } catch (error) {
         // Passes errors from async searchClient call to error handler
         return next(error)

@@ -26,18 +26,19 @@ function run_indexer(){
 }
 
 function wait_indexer_finished(){
-    var result = get_indexer_status();    
-    if (result == "running"){
-        $(".indexerStatus h3").html("Indexer Execution in Progress...");
-        setTimeout(wait_indexer_finished, 5000);
-    }else if(result == "success"){
-        $(".indexerStatus h3").html("Indexer Execution Complete.");
-    }else{
-        $(".indexerStatus h3").html("Error in Indexer Execution.");
-    }    
+    get_indexer_status( function(result) {
+            if (result == "inProgress"){
+                $(".indexerStatus h3").html("Indexer Execution in Progress...");
+                setTimeout(wait_indexer_finished, 5000);
+            }else if(result == "success"){
+                $(".indexerStatus h3").html("Indexer Execution Complete.");
+            }else{
+                $(".indexerStatus h3").html("Error in Indexer Execution.");
+            }    
+    });
 }
 
-function get_indexer_status(){
+function get_indexer_status(callback){
     $.ajax({
         url: window.location.origin + "/indexer/status",
         method: "get",
@@ -45,14 +46,14 @@ function get_indexer_status(){
         success: function(result) {
             var responseJson = JSON.parse(result);
             if (responseJson.status){
-                return responseJson.status;
+                callback(responseJson.status);
             }else{
                 //error unable to get status
-                return "error";
+                callback("error");
             }
         },
         error: function(){
-            return "error";
+            callback("error");
         }
     });
 }
