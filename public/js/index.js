@@ -47,12 +47,12 @@ function run_indexer(){
 function wait_indexer_finished(){
     get_indexer_status( function(result) {
             if (result == "inProgress"){
-                $("#indexerStatus h3").html("Indexer Execution in Progress...");
+                $("#indexerStatus").html("Indexer Execution in Progress...");
                 setTimeout(wait_indexer_finished, 5000);
             }else if(result == "success"){
-                $("#indexerStatus h3").html("Indexer Execution Complete.");
+                $("#indexerStatus").html("Indexer Execution Complete.");
             }else{
-                $("#indexerStatus h3").html("Error in Indexer Execution.");
+                $("#indexerStatus").html("Error in Indexer Execution.");
             }    
     });
 }
