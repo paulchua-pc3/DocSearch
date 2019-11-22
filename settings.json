@@ -1,5 +1,5 @@
 {
-	"storageAccount": "qnasearchbstorage",
-	"accessKey": "bOrhwEemxUp6aRkqfCRLRtIeOj20CuihrbbN518PkWaaSiJLdqP0t6M76KwSa46Xb4e5I9QAeQZBmMrHNjac+A==",
-	"container": "trialcontainer"
+	"storageAccount": "blobstorageforsearch",
+	"accessKey": "QDS47J6CMiu5O2QKmlnqtZPQpKMPT4um6jXaGM9lsADu+J/fTGagydFJF9wFQ5vEgvZoHAAJpNoTF+qR02YlEQ==",
+	"container": "doccontainer"
 }
