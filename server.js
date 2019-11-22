@@ -66,6 +66,13 @@ app.get('/testjson/:id', function (req, res){
   }  
 })
 
+app.post('/search', async function (req,res){
+  var query = req.body.query;
+  const searchClient = new SearchClient(searchConfig);
+  var results = await searchClient.exec_search(query);
+  res.send(results);
+})
+
 
 
 const server = app.listen(process.env.PORT || 3000, function(){

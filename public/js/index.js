@@ -31,6 +31,25 @@ $( document ).ready( function() {
         var text = "This is a sample text";
         display_filePreview(src, filename, text);
     });
+
+    $("#search-form").submit(function(event){
+        event.preventDefault();
+        var query = $("input[name='search']").val();
+
+        $.ajax({
+            url: "/search",
+            method: "post",
+            data: JSON.stringify({"query":query}),
+            contentType: "application/json; charset=utf-8",
+            success: function(result){
+                console.log("result", result);
+                
+            },
+            error: function (error) {
+                console.log("error on search:", error);                
+            }
+        });
+    });
 });
 
 
