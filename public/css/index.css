@@ -5,3 +5,12 @@
 em{
     color:darkorange;
 }
+
+.res{
+    border: 0.5px solid black;
+}
+
+.results{
+    height: 50vh;
+    overflow-y: scroll;
+}

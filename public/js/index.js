@@ -138,10 +138,12 @@ function display_results(results){
         $(new_result).append(new_filename);
 
         for (var i = 0; i < result.snippets.length; i++) {
-            var new_filesnippet = $(".snippet.template").clone().css("display", "block").attr("class", "snippet");
+            var new_filesnippet = $("div.snippet.template").clone().css("display", "block").attr("class", "snippet");
             var result_snippet = result.snippets[i];
             new_filesnippet.find("p").html(result_snippet);
             $(new_result).append(new_filesnippet);
+            var html = $(new_result).html();
+            $(new_result).html(html+"<hr>");
         }
 
         $(new_col).append(new_result);
