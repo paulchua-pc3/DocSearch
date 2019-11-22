@@ -85,22 +85,25 @@ function display_resultsLabel(results){
 }
 
 function display_results(results){
-    var new_result = $(".res.template").clone().css("display", "block").attr("class", "res");
-    var new_filename = $(".filename").clone().css("display", "block").attr("class", "filename");
-    var results_filename = "";
+    var new_result = $(".res.template").clone().attr("class", "res");
+    var new_filename = $(".filename").clone().attr("class", "filename");
+    var results_filename = results.filename;
     new_filename.find("p").html(results_filename);
-    var new_filesnippet = $(".snippet").clone().css("display", "block").attr("class", "snippet");
-    var results_snippet = "";
-    new_filesnippet.find("p").html(results_snippet);
-
-    //Confirm if this will work
     $(".res").append(new_filename);
-    $(".res").append(new_filesnippet);
-    $("#results").append(new_result);
+
+    for (var i = 0; i < results.snippets.length; i++) {
+        var new_filesnippet = $(".snippet").clone().css("display", "block").attr("class", "snippet");
+        var results_snippet = results.snippets[i].text;
+        new_filesnippet.find("p").html(results_snippet);
+        $(".res").append(new_filesnippet);
+    }
+
+    //$("#results").append(new_result);
 }
 
 function display_filePreview(src, filename, text){
-    $("#file_preview").html("<iframe src=\'+src+\">" + filename + "</iframe>");
-    $("#textfile").html(text);
+    $("#modal-label").html(filename);
+    $("#file_preview").html("<iframe src=\'+src+\"></iframe>");
+    $("#file_text").html(text);
     $("#files_modal").modal('show');
 }
