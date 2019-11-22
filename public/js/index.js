@@ -24,6 +24,13 @@ $( document ).ready( function() {
             }
         });
     });
+
+    $("#filename_link").click(function() {
+        var src = "http://docs.google.com/gview?url=http://www.africau.edu/images/default/sample.pdf&embedded=true";
+        var filename = "filename";
+        var text = "This is a sample text";
+        display_filePreview(src, filename, text);
+    });
 });
 
 

@@ -21,15 +21,15 @@
          <div class="col-8 pl-4 m-0">
             <form action="/search">
                <input type="text" placeholder="Search" name="search">
-               <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+               <button type="submit" class="btn btn-primary">Submit</button>
              </form>
          </div>
 
          <div class="col-3 p-0 m-0" id="upload">
-            <label for="file_upload">Upload File</label>
+            <label for="file_upload"><strong>Upload File</strong></label>
             <form id="upload-form" action="" method="" enctype="multipart/form-data">
                <input type="file" name="snapshot" />
-               <button type="submit" class="btn btn-primary btn-sm" id="upload-btn">Upload</button>
+               <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
             </form>
          </div>
          <div class="col-1 pr-2 pt-4 pl-0 m-0">
@@ -38,11 +38,8 @@
       </div>
       <div class="row no-gutters">
            <div class="col-2 pl-4 m-0">
-             <label for="run_indexer">Run Indexer</label>
-             <button class="btn btn-primary btn-sm" id="updateIndex">Update</button>
-           </div>
-           <div class="col-2 p-0 m-0">
-             <h5>Status:</h5>
+             <label for="run_indexer"><strong>Run Indexer</strong></label>
+             <button class="btn btn-primary" id="updateIndex">Update</button>
            </div>
            <div class="col-3 p-0 m-0">
              <div id="indexerStatus">
@@ -59,7 +56,7 @@
         <div class="col pl-5 m-0">
           <div class="results">
             <div class="panel panel-default" id="res template">
-              <a href="#" data-toggle="modal" data-target=".bd-example-modal-lg"> <div class="filename"><p>NLU.pdf</p></div> </a>          
+              <a href="#" data-toggle="modal" data-target=".bd-example-modal-lg" id="filename_link"> <div class="filename"><p>NLU.pdf</p></div> </a>          
               <div class="snippet">
                 <p></p>
               </div>
@@ -81,7 +78,7 @@
             <div class="modal-body" id="files_modal_body">
               <div class="container-fluid">
                 <div class="row">
-                  <div class="col-6" id="file_prev"><iframe src="http://docs.google.com/gview?url=http://www.africau.edu/images/default/sample.pdf&embedded=true" style="width:500px; height:600px;" frameborder="0.5"></iframe></div>
+                  <div class="col-6" id="file_prev"></div>
                   <div class="col-6" id="file_text">Text</div>
                 </div>
               </div>
