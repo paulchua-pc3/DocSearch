@@ -56,11 +56,17 @@ app.get('/indexer/status', async (req, res) => {
     }
 });
 
-const testJson = require('./test2.json');
-app.get('/testjson', function (req, res){
-  res.send(JSON.stringify(testJson));
-
+const testJson = require('./test.json');
+const test2Json = require('./test2.json');
+app.get('/testjson/:id', function (req, res){
+  if (req.params.id == 2){
+    res.send(JSON.stringify(test2Json));
+  }else{
+    res.send(JSON.stringify(testJson));
+  }  
 })
+
+
 
 const server = app.listen(process.env.PORT || 3000, function(){
     console.log(`Server started on port ${process.env.PORT || 3000}`);
