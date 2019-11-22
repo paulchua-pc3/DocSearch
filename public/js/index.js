@@ -61,9 +61,11 @@ function wait_indexer_finished(){
                 $("#indexerStatus").html("Indexer Execution in Progress...");
                 setTimeout(wait_indexer_finished, 5000);
             }else if(result == "success"){
+                $("#indexerStatus").html("");
                 alert("Indexer Execution Complete.");
                 //$("#indexerStatus").html("Indexer Execution Complete.");
             }else{
+                $("#indexerStatus").html("");
                 alert("Error in Indexer Execution.");
                 //$("#indexerStatus").html("Error in Indexer Execution.");
             }    
