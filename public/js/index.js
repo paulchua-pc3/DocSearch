@@ -55,6 +55,13 @@ $( document ).ready( function() {
             }
         });
     });
+
+    $('#files_modal').on('show.bs.modal', function (event) {
+        var link = $(event.relatedTarget);
+        var modal = $(this)
+        modal.find('.modal-title').text(link.html());
+        modal.find('#docImg').attr("src",link.html());
+    })
 });
 
 
