@@ -69,8 +69,33 @@ app.get('/testjson/:id', function (req, res){
 app.post('/search', async function (req,res){
   var query = req.body.query;
   const searchClient = new SearchClient(searchConfig);
-  var results = await searchClient.exec_search(query);
-  res.send(results);
+  var result = await searchClient.exec_search(query);
+  var resultJson = JSON.parse(result);
+  var resultCount = resultJson["@odata.count"];
+  var responseItems = [];
+  resultJson.value.forEach( function (item){
+    var filename = item.metadata_storage_name;
+    var snippets = item["@search.highlights"].mergedText;
+    var layoutText = item.layoutText[0];
+    var keyphrases = item.keyphrases;
+    var locations = item.locations;
+    var organizations = item.organizations;
+    var people = item.people;
+    var responseItem = {
+      "filename": filename,
+      "snippets": snippets,
+      "layoutText": layoutText,
+      "keyphrases": keyphrases,
+      "locations": locations,
+      "organizations": organizations,
+      "people": people
+    }
+    responseItems.push(responseItem);
+  });
+
+  var response = JSON.stringify(responseItems); 
+
+  res.send(response);
 })
 
 

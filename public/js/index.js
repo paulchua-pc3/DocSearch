@@ -38,6 +38,7 @@ $( document ).ready( function() {
 
     $("#search-form").submit(function(event){
         event.preventDefault();
+        $(".results").html("");//clear result area
         var query = $("input[name='search']").val();
 
         $.ajax({
@@ -45,9 +46,9 @@ $( document ).ready( function() {
             method: "post",
             data: JSON.stringify({"query":query}),
             contentType: "application/json; charset=utf-8",
-            success: function(result){
-                console.log("result", result);
-                
+            success: function(results){
+                var resultsJson = JSON.parse(results);
+                display_results(resultsJson);
             },
             error: function (error) {
                 console.log("error on search:", error);                
@@ -68,9 +69,12 @@ function run_indexer(){
                 wait_indexer_finished();
             }else {
                 //error
+                alert("Error in Starting Indexer.");
             }
         },
-        error: function(){}
+        error: function(){
+            alert("Error in Starting Indexer.");
+        }
     });
 }
 
@@ -113,26 +117,37 @@ function get_indexer_status(callback){
 
 //To confirm
 function display_resultsLabel(results){
+    var countString = "";
     if (results.length > 0) {
-        $("#results_label").html("Results");
+        countString = ` (${results.length})`
+        $("#results_label").html("Results"+countString);
+    }else{
+        $("#results_label").html("No Result Found");
     }
 }
 
 function display_results(results){
-    var new_result = $(".res.template").clone().attr("class", "res");
-    var new_filename = $(".filename").clone().attr("class", "filename");
-    var results_filename = results.filename;
-    new_filename.find("p").html(results_filename);
-    $(".res").append(new_filename);
+    display_resultsLabel(results);
+    results.forEach( function (result){
+        var new_row = $(".row.template").clone().attr("class", "row");
+        var new_col = $(".col.template").clone().attr("class", "col");
+        var new_result = $(".res.template").clone().attr("class", "res");
+        var new_filename = $(".filename_link.template").clone().attr("class", "filename_link");
+        var result_filename = result.filename;
+        new_filename.html(result_filename);
+        $(new_result).append(new_filename);
 
-    for (var i = 0; i < results.snippets.length; i++) {
-        var new_filesnippet = $(".snippet").clone().css("display", "block").attr("class", "snippet");
-        var results_snippet = results.snippets[i].text;
-        new_filesnippet.find("p").html(results_snippet);
-        $(".res").append(new_filesnippet);
-    }
+        for (var i = 0; i < result.snippets.length; i++) {
+            var new_filesnippet = $(".snippet.template").clone().css("display", "block").attr("class", "snippet");
+            var result_snippet = result.snippets[i];
+            new_filesnippet.find("p").html(result_snippet);
+            $(new_result).append(new_filesnippet);
+        }
 
-    //$("#results").append(new_result);
+        $(new_col).append(new_result);
+        $(new_row).append(new_col);
+        $(".results").append(new_row);
+    });
 }
 
 function display_filePreview(src, filename, entities){
