@@ -1,92 +1,106 @@
 <html>
-   <head>  
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-     <title>Search</title>
-     <!-- bootstrap -->
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	 <head>  
+		 <meta name="viewport" content="width=device-width, initial-scale=1">
+		 <title>Search</title>
+		 <!-- bootstrap -->
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-      <!-- jquery 3.2.1 -->
-      <script src="js/jquery/jquery-3.2.1.min.js"></script>
-      <script src="js/index.js"></script>
-   </head>
-   <body>
-     <div class="jumbotron">
-        <h1>Azure Cognitive Search</h1>
-     </div>
-     
-      <div class="row justify-content-between no-gutters">
-         <div class="col-8 pl-4 m-0">
-            <form action="/search">
-               <input type="text" placeholder="Search" name="search">
-               <button type="submit" class="btn btn-primary">Submit</button>
-             </form>
-         </div>
+			<!-- jquery 3.2.1 -->
+			<script src="js/jquery/jquery-3.2.1.min.js"></script>
+			<script src="js/index.js"></script>
+	 </head>
+	 <body>
+		 <div class="jumbotron">
+			<h1>Azure Cognitive Search</h1>
+		 </div>
+		 <ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item">
+				<a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="false">Upload</a>
+			</li>
+		</ul>
 
-         <div class="col-3 p-0 m-0" id="upload">
-            <label for="file_upload"><strong>Upload File</strong></label>
-            <form id="upload-form" action="" method="" enctype="multipart/form-data">
-               <input type="file" name="snapshot" />
-               <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
-            </form>
-         </div>
-         <div class="col-1 pr-2 pt-4 pl-0 m-0">
-           <p id="upload-message"></p>
-         </div>
-      </div>
-      <div class="row no-gutters">
-           <div class="col-2 pl-4 m-0">
-             <label for="run_indexer"><strong>Run Indexer</strong></label>
-             <button class="btn btn-primary" id="updateIndex">Update</button>
-           </div>
-           <div class="col-3 p-0 m-0">
-             <div id="indexerStatus">
-                 <h4></h4>
-             </div>
-           </div>
-      </div>
-      <div class="row no-gutters">
-        <div class="col p-4 m-0">
-          <h3 id="results_label">Results</h3>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col pl-5 m-0">
-          <div class="results">
-            <div class="panel panel-default" id="res template">
-              <a href="#" data-toggle="modal" data-target=".bd-example-modal-lg" id="filename_link"> <div class="filename"><p>NLU.pdf</p></div> </a>          
-              <div class="snippet">
-                <p></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+		<div class="tab-content" id="myTabContent">
+			<!--Home Tab -->
+			<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+				<div class="row no-gutters">
+					<div class="col-4 p-4 m-0">
+						<form action="/search">
+							<input type="text" placeholder="Search" name="search">
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</form>
+					</div>
+				</div>
+				<div class="row no-gutters">
+					<div class="col p-4 m-0">
+						<h3 id="results_label">Results</h3>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col pl-5 m-0">
+						<div class="results">
+							<div class="panel panel-default" id="res template">
+								<a href="#" data-toggle="modal" data-target=".bd-example-modal-lg" id="filename_link"> <div class="filename"><p>NLU.pdf</p></div> </a>          
+								<div class="snippet">
+									<p></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <!--Modal -->
-      <div class="modal fade bd-example-modal-lg" id="files_modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="modal-label">NLU.pdf</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body" id="files_modal_body">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col-6" id="file_prev"></div>
-                  <div class="col-6" id="file_text">Text</div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-            </div>
-          </div>
-        </div>
-      </div>
-   </body>
+			<!-- Upload Tab -->
+			<div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+				<div class="row justify-content-between no-gutters">
+					<div class="col-9 p-3 m-0">
+						<label for="upload-form"><strong>Upload File</strong></label>
+						<form id="upload-form" action="" method="" enctype="multipart/form-data">
+							 <input type="file" name="snapshot" id="file_name" />
+							 <button type="submit" class="btn btn-primary" id="upload-btn">Upload</button>
+						</form>
+					</div>
+					<div class="col-2 pt-5 m-0">
+						<label for="updateIndex"><strong>Run Indexer</strong></label>
+						<button class="btn btn-primary" id="updateIndex">Update</button>
+					</div>
+					<div class="col-1 pt-5 m-0">
+						<div id="indexerStatus">
+							<h4></h4>
+						</div>
+					</div>
+				</div>
+
+				<div class="row no-gutters">
+					
+				</div>
+			</div>
+		</div>
+		 
+		<!--Modal -->
+		<div class="modal fade bd-example-modal-lg" id="files_modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modal-label"></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="container-fluid">
+						<div class="modal-body" id="files_modal_body"></div>
+						<label for="file_entities"><strong>Entities:</strong></label>
+						<div id="file_entities"></div>
+					</div>
+					<div class="modal-footer">
+					</div>
+				</div>
+			</div>
+		</div>
+	 </body>
 </html>

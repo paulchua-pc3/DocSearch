@@ -17,19 +17,23 @@ $( document ).ready( function() {
             contentType: false,
             success: function(result){
                 console.log("result", result);
-                $("#upload-message").html(result);
+                alert("File uploaded successfully.");
+                $("#file_name").val('');
+                //$("#upload-message").html(result);
             },
             error: function (error) {
-                console.log("error on upload:", error);                
+                console.log("error on upload:", error);    
+                alert("Error uploading file.");
             }
         });
     });
 
     $("#filename_link").click(function() {
-        var src = "http://docs.google.com/gview?url=http://www.africau.edu/images/default/sample.pdf&embedded=true";
+        var src = "https://www.nlpacademy.co.uk/images/uploads/whatisnlp.jpg";
         var filename = "filename";
-        var text = "This is a sample text";
-        display_filePreview(src, filename, text);
+        var entities = "entities, people, organization, location";
+
+        display_filePreview(src, filename, entities);
     });
 });
 
@@ -57,9 +61,11 @@ function wait_indexer_finished(){
                 $("#indexerStatus").html("Indexer Execution in Progress...");
                 setTimeout(wait_indexer_finished, 5000);
             }else if(result == "success"){
-                $("#indexerStatus").html("Indexer Execution Complete.");
+                alert("Indexer Execution Complete.");
+                //$("#indexerStatus").html("Indexer Execution Complete.");
             }else{
-                $("#indexerStatus").html("Error in Indexer Execution.");
+                alert("Error in Indexer Execution.");
+                //$("#indexerStatus").html("Error in Indexer Execution.");
             }    
     });
 }
@@ -108,9 +114,8 @@ function display_results(results){
     //$("#results").append(new_result);
 }
 
-function display_filePreview(src, filename, text){
+function display_filePreview(src, filename, entities){
     $("#modal-label").html(filename);
-    $("#file_preview").html("<iframe src=\'+src+\"></iframe>");
-    $("#file_text").html(text);
-    $("#files_modal").modal('show');
+    $("#files_modal_body").html("<img src=\""+ src +"\" style=\"width:250px;height:250px\"></img>");
+    $("#file_entities").html(entities);
 }
