@@ -1,4 +1,6 @@
 
+var resultsJson = {};
+
 $( document ).ready( function() {
 
     $("#updateIndex").click(function(){
@@ -28,14 +30,6 @@ $( document ).ready( function() {
         });
     });
 
-    $("#filename_link").click(function() {
-        var src = "https://www.nlpacademy.co.uk/images/uploads/whatisnlp.jpg";
-        var filename = "filename";
-        var entities = "entities, people, organization, location";
-
-        display_filePreview(src, filename, entities);
-    });
-
     $("#search-form").submit(function(event){
         event.preventDefault();
         $(".results").html("");//clear result area
@@ -47,7 +41,7 @@ $( document ).ready( function() {
             data: JSON.stringify({"query":query}),
             contentType: "application/json; charset=utf-8",
             success: function(results){
-                var resultsJson = JSON.parse(results);
+                resultsJson = JSON.parse(results);
                 display_results(resultsJson);
             },
             error: function (error) {
@@ -59,8 +53,7 @@ $( document ).ready( function() {
     $('#files_modal').on('show.bs.modal', function (event) {
         var link = $(event.relatedTarget);
         var modal = $(this)
-        modal.find('.modal-title').text(link.html());
-        modal.find('#docImg').attr("src",link.html());
+        display_file(modal, link);
     })
 });
 
@@ -159,8 +152,60 @@ function display_results(results){
     });
 }
 
-function display_filePreview(src, filename, entities){
-    $("#modal-label").html(filename);
-    $("#files_modal_body").html("<img src=\""+ src +"\" style=\"width:250px;height:250px\"></img>");
-    $("#file_entities").html(entities);
+function display_file(modal, link){
+    var filename = link.html();
+    modal.find('.modal-title').text(filename);
+    modal.find('#docImg').attr("src",filename);
+}
+
+function display_ocr_image(result) {            
+    var responseJson = JSON.parse(result);
+    var docImg = $( "#docImg" );    
+    docImg.on("load", function(){    
+    var width = docImg.prop("naturalWidth");
+    var height = docImg.prop("naturalHeight");
+    if (width > 2000 && height > 2000){
+        if (width > height){
+            docImg.css("width","2000px");
+        }else{
+            docImg.css("height","2000px");
+        }
+    }
+    else if (width > 2000){
+        docImg.css("width","2000px");
+    }else if (height > 2000){
+        docImg.css("height","2000px");
+    }
+    var words = responseJson.words;
+    var words_in_line_counter = 0;
+    for(var i = 0; i < words.length; i++){       
+        var word = words[i];
+        var boxProperties = getBoxProperties(word.boundingBox);
+
+        var box = $( ".box.tmp" ).clone().css("display","block").attr("class","box").attr("id","word_"+i).css("left", boxProperties.left)
+        .css("top", boxProperties.top).css("width", boxProperties.width).css("height", boxProperties.height);
+        if ( ["決","済","和","田"].includes(word.text)){
+            $(box).css("background-color","rgba(255,255,0,0.5)").css("border","1px solid yellow");
+        }else{
+            $(box).css("background-color","transparent").css("border","none");
+        }
+        
+        $ ("#image_wrapper").append(box);
+
+        var textbox = $( ".textbox.tmp" ).clone().css("display","block").attr("class","box").attr("id","txt_word_"+i).html(word.text);
+        if ( ["決","済","和","田"].includes(word.text)){
+            $(textbox).css("background-color","rgba(255,255,0,0.5)").css("border","1px solid yellow");
+        }else{
+            $(textbox).css("background-color","transparent").css("border","none");
+        }
+
+        $ ("#text_wrapper").append(textbox);
+        words_in_line_counter += 1;
+        if (words_in_line_counter == 10){
+            var html_text = $ ("#text_wrapper").html();
+            $ ("#text_wrapper").html(html_text+"<br/>");
+            words_in_line_counter = 0;
+        }
+    }
+});
 }
