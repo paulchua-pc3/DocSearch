@@ -74,14 +74,16 @@ app.post('/search', async function (req,res){
   var resultCount = resultJson["@odata.count"];
   var responseItems = [];
   resultJson.value.forEach( function (item){
+    var fileUri = item.blob_uri;
     var filename = item.metadata_storage_name;
     var snippets = item["@search.highlights"].mergedText;
-    var layoutText = item.layoutText[0];
+    var layoutText = JSON.parse(item.layoutText[0]);
     var keyphrases = item.keyphrases;
     var locations = item.locations;
     var organizations = item.organizations;
     var people = item.people;
     var responseItem = {
+      "fileUri": fileUri,
       "filename": filename,
       "snippets": snippets,
       "layoutText": layoutText,
