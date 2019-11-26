@@ -14,3 +14,13 @@ em{
     height: 50vh;
     overflow-y: scroll;
 }
+
+#upload-btn{
+	padding: 6px 29px;
+	text-align: center;
+}
+
+#search_input{
+	width: 99%;
+	padding: 6px;
+}
