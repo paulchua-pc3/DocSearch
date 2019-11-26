@@ -5,6 +5,7 @@ var resultsJson = {};
 $( document ).ready( function() {
 
     $("#updateIndex").click(function(){
+        event.preventDefault();//prevent submit action
         run_indexer();
     });
     
