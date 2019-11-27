@@ -1,6 +1,7 @@
 
 var query = "";
 var resultsJson = {};
+const wiki_url = "https://ja.wikipedia.org/wiki/";
 
 $( document ).ready( function() {
 
@@ -172,8 +173,8 @@ function display_file(modal, link){
     var resultItem = resultsJson[resultIndex];
     display_ocr_image(resultItem);
     var keyphrasesText = resultItem.keyphrases.slice(0,10).join(",")+",...";
-    var organizationsText = resultItem.organizations.join(",");
-    var locationsText = resultItem.locations.join(",");
+    var organizationsText = getWikipediaLinksHtml(resultItem.organizations);
+    var locationsText = getWikipediaLinksHtml(resultItem.locations);
     var peopleText = resultItem.people.join(",");
     var entitiesDiv = $( "#file_entities" );
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
@@ -261,4 +262,16 @@ function getBoxProperties(boundingBox){
     var width = right - left;
     var height = bottom - top;
     return {"left" : left, "top" : top, "width" : width, "height" : height};
+}
+
+function getWikipediaLinksHtml(array){
+    return array.reduce(function(accumulator, item, index){
+        //add leading comma only after first item
+        //also strip double-byte space and single-byte space from item
+        if (index == 0){            
+            return accumulator + `<a href="${wiki_url+item.replace(/[ 　]/g,"")}" target="_blank" rel="noopener noreferrer">${item}</a>`;
+        }else{            
+            return accumulator + "," +`<a href="${wiki_url+item.replace(/[ 　]/g,"")}" target="_blank" rel="noopener noreferrer">${item}</a>`;
+        }
+    },"");
 }
