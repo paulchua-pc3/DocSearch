@@ -68,8 +68,9 @@ app.get('/testjson/:id', function (req, res){
 
 app.post('/search', async function (req,res){
   var query = req.body.query;
+  var filter = req.body.filter;
   const searchClient = new SearchClient(searchConfig);
-  var result = await searchClient.exec_search(query);
+  var result = await searchClient.exec_search(query, filter);
   var resultJson = JSON.parse(result);
   var resultCount = resultJson["@odata.count"];
   var responseItems = [];
@@ -77,7 +78,10 @@ app.post('/search', async function (req,res){
     var fileUri = item.blob_uri;
     var filename = item.metadata_storage_name;
     var snippets = item["@search.highlights"].mergedText;
-    var layoutText = JSON.parse(item.layoutText[0]);
+    if (item.layoutText){
+        var layoutText = JSON.parse(item.layoutText[0]);
+    }
+    
     var keyphrases = item.keyphrases;
     var locations = item.locations;
     var organizations = item.organizations;

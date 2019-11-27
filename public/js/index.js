@@ -36,11 +36,19 @@ $( document ).ready( function() {
         event.preventDefault();
         $(".results").html("");//clear result area
         query = $("input[name='search']").val();
+        category = $('#category_filter').val();
+        cat_value = $('#filter_input').val();
+        //"&$filter=organizations/any(o: o eq 'VISA')"
+        if (category && cat_value){
+            filter = "&$filter="+category+"/any(c: c eq "+"\'"+cat_value+"\')";
+        } else {
+            filter = "";
+        }
 
         $.ajax({
             url: "/search",
             method: "post",
-            data: JSON.stringify({"query":query}),
+            data: JSON.stringify({"query":query,"filter":filter}),
             contentType: "application/json; charset=utf-8",
             success: function(results){
                 resultsJson = JSON.parse(results);

@@ -45,9 +45,9 @@ class SearchClient {
     //api call to get indexer status(reset, inProgress, success, error), returns indexer status json
     get_indexer_status() {
         var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/status?api-version=${this.apiVersion}`;
-        
-        var options = { 
-            "url" : url,            
+
+        var options = {
+            "url" : url,
             "headers" : {
                 'Content-Type' : 'application/json',
                 'api-key' : this.apiKey
@@ -61,10 +61,10 @@ class SearchClient {
                         console.log('error:', error);
                     }
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                    //console.log('body:', body);                    
+                    //console.log('body:', body);
                     var indexerStatus = "error";
                     var jsonBody = JSON.parse(body);
-                    if (jsonBody.lastResult && jsonBody.lastResult.status){                       
+                    if (jsonBody.lastResult && jsonBody.lastResult.status){
                         indexerStatus = jsonBody.lastResult.status;
                         //treat reset the same as inProgress
                         if (indexerStatus == "reset"){
@@ -76,17 +76,17 @@ class SearchClient {
                 })
             }
         );
-        return requestPromise;   
+        return requestPromise;
     }
 
     //api call to run search, returns response body
-    exec_search(query) {
+    exec_search(query, filter) {
 
         var url = `https://${this.searchServiceName}.search.windows.net/indexes/${this.indexName}/docs?api-version=${this.apiVersion}&queryType=simple&searchMode=all&highlight=mergedText&$count=true&search=`;
-    
+        
         var query_encoded = encodeURIComponent(query);
         var options = { 
-            "url" : url+query_encoded,
+            "url" : url+query_encoded + filter,
             "headers" : {
                 'Content-Type' : 'application/json',
                 'api-key' : this.apiKey
@@ -100,7 +100,7 @@ class SearchClient {
                         console.log('error:', error);
                     }
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                    //console.log('body:', body);
+                    console.log('body:', body);
                     resolve(body);
                 })
             }
