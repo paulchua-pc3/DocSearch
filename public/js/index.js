@@ -243,6 +243,7 @@ function display_ocr_image(resultItem) {
                 words_in_line_counter = 0;
             }
         }
+        docImg.off("load");
     });
 }
 
