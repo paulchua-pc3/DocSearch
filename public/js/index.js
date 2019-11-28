@@ -27,7 +27,7 @@ $( document ).ready( function() {
                 //$("#upload-message").html(result);
             },
             error: function (error) {
-                console.log("error on upload:", error);    
+                console.log("error on upload:", error);
                 alert("Error uploading file.");
             }
         });
@@ -37,15 +37,42 @@ $( document ).ready( function() {
         event.preventDefault();
         $(".results").html("");//clear result area
         query = $("input[name='search']").val();
-        category = $('#category_filter').val();
-        cat_value = $('#filter_input').val();
-        //"&$filter=organizations/any(o: o eq 'VISA')"
-        if (category && cat_value){
-            filter = "&$filter="+category+"/any(c: c eq "+"\'"+cat_value+"\')";
-        } else {
+        org = $('#filter_org').val();
+        people = $('#filter_people').val();
+        loc = $('#filter_loc').val();
+        year = $('#filter_year').val();
+
+        filter = "$filter=";
+        has_filter = false;
+        if (org){
+            filter += "organizations/any(o: o eq "+"\'"+org.replace(/^\s+|\s+$/g,'')+"\')";
+            has_filter = true;
+        }
+        if (people){
+            if (org){
+                filter += " and ";
+            }
+            filter += "people/any(p: p eq "+"\'"+people.replace(/^\s+|\s+$/g,'')+"\')";
+            has_filter = true;
+        }
+        if (loc) {
+            if (org || people){
+                filter += " and ";
+            }
+            filter += "locations/any(l: l eq "+"\'"+loc.replace(/^\s+|\s+$/g,'')+"\')";
+            has_filter = true;
+        }
+        if (year){
+            if (org || people || loc){
+                filter += " and ";
+            }
+            filter += "datetime/any(d: d eq "+"\'"+year.replace(/^\s+|\s+$/g,'')+"\')";
+            has_filter = true;
+        }
+        if (!has_filter){
             filter = "";
         }
-
+        
         $.ajax({
             url: "/search",
             method: "post",

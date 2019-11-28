@@ -24,3 +24,8 @@ em{
 	width: 99%;
 	padding: 6px;
 }
+
+#filter_org, #filter_people, #filter_loc, #filter_year{
+	width: 99%;
+	padding: 3px;
+}

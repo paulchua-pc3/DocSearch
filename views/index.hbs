@@ -4,10 +4,10 @@
 		 <title>Search</title>
 		  <!-- jquery 3.4.1 -->
 			<script src="js/jquery/jquery-3.4.1.min.js"></script>
-      <!-- bootstrap 4.3.1 -->
-      <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-      <!-- use bootstrap bundle js that already includes popper dependency  -->
-      <script src="js/bootstrap/bootstrap.bundle.min.js"></script>
+			<!-- bootstrap 4.3.1 -->
+			<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+			<!-- use bootstrap bundle js that already includes popper dependency  -->
+			<script src="js/bootstrap/bootstrap.bundle.min.js"></script>
 			<script src="js/index.js"></script>
       <link href="css/index.css" type="text/css" rel="stylesheet">
 	 </head>
@@ -17,15 +17,15 @@
 		 </div>
 		 <ul class="nav nav-tabs" id="myTab" role="tablist">
 			<li class="nav-item">
-				<a class="nav-link active" id="search-tab" data-toggle="tab" href="#search" role="tab" aria-controls="search" aria-selected="true">Search</a>
+				<a class="nav-link active" id="search-tab" data-toggle="tab" href="#search" role="tab" aria-controls="search" aria-selected="true"><strong>Search</strong></a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" id="upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="false">Upload</a>
+				<a class="nav-link" id="upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="false"><strong>Upload</strong></a>
 			</li>
 		</ul>
 
 		<div class="tab-content" id="myTabContent">
-			<!--Home Tab -->
+			<!-- Search Tab -->
 			<div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
 				<form id="search-form" action="/search">
 					<div class="row no-gutters">
@@ -37,6 +37,43 @@
 						</div>
 					</div>
 					<div class="row no-gutters">
+						<div class="col-5 pl-4 pt-2 m-0">
+							<label for="entity_filters"><strong>SHOW DOCUMENTS WITH THE FOLLOWING:</strong></label>
+						</div>
+					</div>
+					<div class="row no-gutters">
+						<div class="col-1 pl-5 pt-2 m-0">
+							<label for="organizations_category">Organizations</label>
+						</div>
+						<div class="col-4 pl-4 pt-2 m-0">
+							<input type="text" aria-label="Text input with dropdown button" id="filter_org">
+						</div>
+					</div>
+					<div class="row no-gutters">
+						<div class="col-1 pl-5 pt-2 m-0">
+							<label for="people_category">People</label>
+						</div>
+						<div class="col-4 pl-4 pt-2 m-0">
+							<input type="text" aria-label="Text input with dropdown button" id="filter_people">
+						</div>
+					</div>
+					<div class="row no-gutters">
+						<div class="col-1 pl-5 pt-2 m-0">
+							<label for="locations_category">Locations</label>
+						</div>
+						<div class="col-4 pl-4 pt-2 m-0">
+							<input type="text" aria-label="Text input with dropdown button" id="filter_loc">
+						</div>
+					</div>
+					<div class="row no-gutters">
+						<div class="col-1 pl-5 pt-2 m-0">
+							<label for="year_category">Year</label>
+						</div>
+						<div class="col-4 pl-4 pt-2 m-0">
+							<input type="text" aria-label="Text input with dropdown button" id="filter_year">
+						</div>
+					</div>
+					<!-- <div class="row no-gutters">
 						<div class="col-5 pl-4 pt-2 m-0">
 							<div class="input-group mb-3">
 								<div class="input-group-prepend">
@@ -51,7 +88,7 @@
 								<input type="text" class="form-control" aria-label="Text input with dropdown button" id="filter_input">
 							</div>
 						</div>
-					</div>
+					</div> -->
 				</form>
 				<div class="row no-gutters">
 					<div class="col p-4 m-0">
@@ -78,10 +115,6 @@
 					<div class="col-3 pl-4 pt-3 m-0">
 						<input type="file" name="snapshot" id="file_name" />
 					</div>
-					<div class="col-2 pt-3 m-0">						
-					</div>
-					<div class="col-1 pt-5 m-0">						
-					</div>
 				</div>				
 				<div class="row no-gutters">
 					<div class="col-2 pl-4 pt-3 m-0">
@@ -94,7 +127,7 @@
 					</div>
 					<div class="col-1 pt-5 m-0">
 						<div id="indexerStatus">
-						<h4></h4>
+							<h4></h4>
 						</div>
 					</div>
 				</div>
