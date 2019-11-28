@@ -78,8 +78,9 @@ app.post('/search', async function (req,res){
     var fileUri = item.blob_uri;
     var filename = item.metadata_storage_name;
     var snippets = item["@search.highlights"].mergedText;
-    if (item.layoutText){
-        var layoutText = JSON.parse(item.layoutText[0]);
+    var layoutText = "";
+    if (item.layoutText && item.layoutText.length > 0){
+        layoutText = JSON.parse(item.layoutText[0]);
     }
     
     var keyphrases = item.keyphrases;
