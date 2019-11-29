@@ -102,7 +102,7 @@ class SearchClient {
                         console.log('error:', error);
                     }
                     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                    console.log('body:', body);
+                    //console.log('body:', body);
                     resolve(body);
                 })
             }

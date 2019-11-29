@@ -88,6 +88,13 @@ $( document ).ready( function() {
         });
     });
 
+    $('#clear_filters').click(function() {
+        $('#filter_org').val("");
+        $('#filter_people').val("");
+        $('#filter_loc').val("");
+        $('#filter_year').val("");
+    });
+
     $('#files_modal').on('show.bs.modal', function (event) {
         var link = $(event.relatedTarget);
         var modal = $(this);

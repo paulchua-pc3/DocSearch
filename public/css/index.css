@@ -29,3 +29,8 @@ em{
 	width: 99%;
 	padding: 3px;
 }
+
+#clear_filters{
+	padding: 6px 18px;
+	text-align: center;
+}
