@@ -71,6 +71,9 @@ $( document ).ready( function() {
         }
         if (!has_filter){
             filter = "";
+        } else {
+            encoded_filter = encodeURIComponent(filter);
+            filter = "&" + encodeURIComponent("$filter") + "=" + encoded_filter;
         }
         
         $.ajax({
