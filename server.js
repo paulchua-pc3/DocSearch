@@ -77,7 +77,12 @@ app.post('/search', async function (req,res){
   resultJson.value.forEach( function (item){
     var fileUri = item.blob_uri;
     var filename = item.metadata_storage_name;
-    var snippets = item["@search.highlights"].mergedText;
+    var snippets = [];
+    if (item["@search.highlights"]){
+      snippets = item["@search.highlights"].mergedText;
+    }else{
+      
+    }
     var layoutText = "";
     if (item.layoutText && item.layoutText.length > 0){
         layoutText = JSON.parse(item.layoutText[0]);
@@ -87,6 +92,7 @@ app.post('/search', async function (req,res){
     var locations = item.locations;
     var organizations = item.organizations;
     var people = item.people;
+    var datetime = item.datetime;
     var responseItem = {
       "fileUri": fileUri,
       "filename": filename,
@@ -95,7 +101,8 @@ app.post('/search', async function (req,res){
       "keyphrases": keyphrases,
       "locations": locations,
       "organizations": organizations,
-      "people": people
+      "people": people,
+      "datetime": datetime
     }
     responseItems.push(responseItem);
   });

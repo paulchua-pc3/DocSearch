@@ -210,11 +210,13 @@ function display_file(modal, link){
     var organizationsText = getWikipediaLinksHtml(resultItem.organizations);
     var locationsText = getWikipediaLinksHtml(resultItem.locations);
     var peopleText = resultItem.people.join(",");
+    var datetimeText = resultItem.datetime.join(",");
     var entitiesDiv = $( "#file_entities" );
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
                      +`Organizations:<br/>${organizationsText}<br/><br/>`
                      +`Locations:<br/>${locationsText}<br/><br/>`
-                     +`People:<br/>${peopleText}`);
+                     +`People:<br/>${peopleText}<br/><br/>`
+                     +`Datetime:<br/>${datetimeText}`);
 }
 
 function display_ocr_image(resultItem) {
