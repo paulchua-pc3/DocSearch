@@ -42,7 +42,7 @@ $( document ).ready( function() {
         loc = $('#filter_loc').val();
         year = $('#filter_year').val();
 
-        filter = "$filter=";
+        filter = "";
         has_filter = false;
         if (org){
             filter += "organizations/any(o: o eq "+"\'"+org.replace(/^\s+|\s+$/g,'')+"\')";

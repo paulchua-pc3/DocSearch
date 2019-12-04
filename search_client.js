@@ -86,9 +86,9 @@ class SearchClient {
         
         var query_encoded = encodeURIComponent(query);
         var filter_encoded = encodeURIComponent(filter);
-        console.log(query_encoded);
+        
         var options = { 
-            "url" : url+query_encoded + "&" + filter_encoded,
+            "url" : url+query_encoded + "&$filter=" + filter_encoded,
             "headers" : {
                 'Content-Type' : 'application/json',
                 'api-key' : this.apiKey
