@@ -53,7 +53,7 @@ $( document ).ready( function() {
         loc = $('#filter_loc').val();
         year = $('#filter_year').val();
 
-        filter = "$filter=";
+        filter = "";
         has_filter = false;
         if (org){
             filter += "organizations/any(o: o eq "+"\'"+org.replace(/^\s+|\s+$/g,'')+"\')";
@@ -82,6 +82,9 @@ $( document ).ready( function() {
         }
         if (!has_filter){
             filter = "";
+        } else {
+            encoded_filter = encodeURIComponent(filter);
+            filter = "&" + encodeURIComponent("$filter") + "=" + encoded_filter;
         }
         
         $.ajax({
