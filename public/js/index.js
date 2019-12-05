@@ -3,6 +3,17 @@ var query = "";
 var resultsJson = {};
 const wiki_url = "https://ja.wikipedia.org/wiki/";
 
+/**pdf viewer start */
+var pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 1.0,
+        canvas = null,
+        ctx = null,
+        pdfjsLib = null;
+/**pdf viewer end */
+
 $( document ).ready( function() {
 
     $("#updateIndex").click(function(){
@@ -100,9 +111,24 @@ $( document ).ready( function() {
         var modal = $(this);
         display_file(modal, link);
     })
+
+    /**pdf viewer start */
+    pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.worker.js';
+    
+    // can't get sizing to work when using jquery selectors, so comment for now
+    //canvas = $('#the-canvas');
+    //ctx = canvas.get(0).getContext('2d');
+    canvas = document.getElementById('the-canvas'),    
+    ctx = canvas.getContext('2d');    
+
+    $('#prev').click(onPrevPage);
+    $('#next').click(onNextPage);
+    /**pdf viewer end */
+
 });
-
-
+ 
 function run_indexer(){
     $.ajax({
         url: window.location.origin + "/indexer/run",
@@ -201,11 +227,36 @@ function display_results(results){
 
 function display_file(modal, link){    
     var filename = link.html();
-    modal.find('.modal-title').text(filename);
+    modal.find('.modal-title').text(filename);    
     var fileId = link.attr("id");
     var resultIndex = parseInt(fileId.split("file")[1]);    
     var resultItem = resultsJson[resultIndex];
-    display_ocr_image(resultItem);
+    /**pdf viewer start */
+    if (filename.match(/\.pdf$/i) != null){
+        pageNum = 1;
+        pageRendering = false;
+        pageNumPending = null;
+        $('#image_viewer').css("display","none");
+        $('#pdf_viewer').css("display","block");
+        var uri = resultItem.fileUri;
+        /**
+         * Asynchronously downloads PDF.
+         */
+        pdfjsLib.getDocument(uri).promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            $('#page_count').text(pdfDoc.numPages);
+
+            // Initial/first page rendering
+            renderPage(pageNum);
+
+        });
+    /**pdf viewer end */
+    }else{
+        $('#pdf_viewer').css("display","none");
+        $('#image_viewer').css("display","block");
+        display_ocr_image(resultItem);
+    }
+    
     var keyphrasesText = resultItem.keyphrases.slice(0,10).join(",")+",...";
     var organizationsText = getWikipediaLinksHtml(resultItem.organizations);
     var locationsText = getWikipediaLinksHtml(resultItem.locations);
@@ -311,3 +362,78 @@ function getWikipediaLinksHtml(array){
         }
     },"");
 }
+
+/**pdf viewer start */
+
+/**
+ * Get page info from document, resize canvas accordingly, and render page.
+ * @param num Page number.
+ */
+function renderPage(num) {
+    pageRendering = true;
+    // Using promise to fetch the page
+    pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({scale: scale});
+    // can't get sizing to work when using jquery selectors, so comment for now
+    //canvas.css("height", viewport.height);
+    //canvas.css("width", viewport.width);
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;    
+
+    // Render PDF page into canvas context
+    var renderContext = {
+        canvasContext: ctx,
+        viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+
+    // Wait for rendering to finish
+    renderTask.promise.then(function() {
+        pageRendering = false;
+        if (pageNumPending !== null) {
+        // New page rendering is pending
+        renderPage(pageNumPending);
+        pageNumPending = null;
+        }
+    });
+    });
+
+    // Update page counters
+    $('#page_num').text(num);
+}
+
+/**
+ * If another page rendering in progress, waits until the rendering is
+ * finised. Otherwise, executes rendering immediately.
+ */
+function queueRenderPage(num) {
+    if (pageRendering) {
+    pageNumPending = num;
+    } else {
+    renderPage(num);
+    }
+}
+
+/**
+ * Displays previous page.
+ */
+function onPrevPage() {
+    if (pageNum <= 1) {
+    return;
+    }
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Displays next page.
+ */
+function onNextPage() {
+    if (pageNum >= pdfDoc.numPages) {
+    return;
+    }
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+/**pdf viewer end */
