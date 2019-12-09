@@ -265,7 +265,7 @@ function display_file(modal, link){
     var locationsText = getWikipediaLinksHtml(resultItem.locations);
     var peopleText = resultItem.people.join(",");
     var datetimeText = resultItem.datetime.join(",");
-    var symptomsText = resultItem.symptoms.filter(x=>(x!="\n")).join(",");
+    var symptomsText = resultItem.symptoms.filter(x => x!="\n").join(",");
     var entitiesDiv = $( "#file_entities" );
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
                      +`Organizations:<br/>${organizationsText}<br/><br/>`
