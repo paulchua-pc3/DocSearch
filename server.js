@@ -93,6 +93,7 @@ app.post('/search', async function (req,res){
     var organizations = item.organizations;
     var people = item.people;
     var datetime = item.datetime;
+    var symptoms = item.foundEntities;
     var responseItem = {
       "fileUri": fileUri,
       "filename": filename,
@@ -102,7 +103,8 @@ app.post('/search', async function (req,res){
       "locations": locations,
       "organizations": organizations,
       "people": people,
-      "datetime": datetime
+      "datetime": datetime,
+      "symptoms": symptoms
     }
     responseItems.push(responseItem);
   });
