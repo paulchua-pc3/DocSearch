@@ -253,13 +253,73 @@ function display_file(modal, link){
             renderPage(pageNum);
 
         });
-    /**pdf viewer end */
+    /**pdf viewer end */        
     }else{
         $('#pdf_viewer').css("display","none");
         $('#image_viewer').css("display","block");
         display_ocr_image(resultItem);
     }
-    
+
+    var s_pages = [];
+    for (var i = 0; i < resultItem.layoutText.length; i++){
+        var lines = resultItem.layoutText[i].lines;
+        var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) );
+        var t_line = [];
+        if(s_line.length > 0){
+            var boxProps = getBoxProperties(s_line[0].boundingBox);
+            var x1 = boxProps.left;
+            var y1 = boxProps.top - 10;
+            t_line = lines.filter(x => {
+                var leftLimit =  x1 - 20;
+                var rightLimit = x1 + boxProps.width;
+                var topMinimum = y1 + boxProps.height;
+                var left = getBoxProperties(x.boundingBox).left;
+                var top = getBoxProperties(x.boundingBox).top;
+                return (left > leftLimit && left < rightLimit && top > topMinimum); 
+            }).reduce((prev, x) => {               
+                if (prev.length == 0){
+                    var arr = [];
+                    arr.push(x);
+                    return arr;
+                }else{
+                    var prevTop = getBoxProperties(prev[0].boundingBox).top;
+                    var xTop = getBoxProperties(x.boundingBox).top;                    
+                    if (prevTop < xTop ){
+                        return prev;
+                    }else{                        
+                        var arr = [];
+                        arr.push(x);
+                        return arr;
+                    }                    
+                }
+            },[]);
+            if (t_line.length > 0){                
+                var leftLimit =  x1 + boxProps.width;
+                //var rightLimit = x1 + boxProps.width;
+                var topMinimum = y1;
+                var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
+                var topMaximum = t_lineBoxProps.top - 5;
+                var sur_lines = [];
+                sur_lines = lines.filter(x => {                    
+                    var left = getBoxProperties(x.boundingBox).left;
+                    var top = getBoxProperties(x.boundingBox).top;
+                    return (left > leftLimit && top > topMinimum && top < topMaximum); 
+                }).filter(x => !x.text.match(/^[0-9]+$/));
+                highlightLines(sur_lines);
+                s_pages.push(sur_lines.map(x => x.text).join(" <br/> "));
+            }else{
+                s_pages.push("無し");    
+            }           
+            
+        }else{
+            s_pages.push("無し");
+        }
+    }
+    var surText = "";
+    if (s_pages.length > 0){
+        surText = s_pages.join(" <br/>---<br/> ");
+    }
+
     var keyphrasesText = resultItem.keyphrases.slice(0,10).join(",")+",...";
     var organizationsText = getWikipediaLinksHtml(resultItem.organizations);
     var locationsText = getWikipediaLinksHtml(resultItem.locations);
@@ -272,7 +332,8 @@ function display_file(modal, link){
                      +`Locations:<br/>${locationsText}<br/><br/>`
                      +`People:<br/>${peopleText}<br/><br/>`
                      +`Datetime:<br/>${datetimeText}<br/><br/>`
-                     +`Symptoms:<br/>${symptomsText}`);
+                     +`Symptoms:<br/>${symptomsText}<br/><br/>`
+                     +`手術:<br/>${surText}`);
 }
 
 function display_ocr_image(resultItem) {
@@ -445,3 +506,17 @@ function onNextPage() {
 }
 
 /**pdf viewer end */
+
+function highlightLines(lines){
+    for(var i = 0; i < lines.length; i++){       
+        var line = lines[i];
+        var boxProperties = getBoxProperties(line.boundingBox);
+        var box = $( ".box.tmp" ).clone().css("display","block").attr("class","box act").attr("id","line_"+i).css("left", boxProperties.left)
+        .css("top", boxProperties.top).css("width", boxProperties.width).css("height", boxProperties.height);
+        
+        $(box).css("background-color","rgba(0,255,0,0.5)").css("border","1px solid yellow");
+        
+        
+        $ ("#image_wrapper").append(box);
+    }
+}
