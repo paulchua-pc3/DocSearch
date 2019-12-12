@@ -299,7 +299,10 @@ function display_ocr_image(resultItem) {
             docImg.css("height","2000px");
         }
         
-        var words = resultItem.layoutText.words;
+        var words = [];
+        if (resultItem.layoutText && resultItem.layoutText.length > 0){
+            words = resultItem.layoutText[0].words;
+        }
         var words_in_line_counter = 0;
         var queryWords = query.split(/\s+/);
         var jpnRegex = /([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf])+/;        

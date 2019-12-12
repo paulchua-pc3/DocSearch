@@ -83,9 +83,10 @@ app.post('/search', async function (req,res){
     }else{
       
     }
-    var layoutText = "";
+    var layoutText = [];    
     if (item.layoutText && item.layoutText.length > 0){
-        layoutText = JSON.parse(item.layoutText[0]);
+        //layoutText = JSON.parse(item.layoutText[0]);
+        layoutText = item.layoutText.map(x => JSON.parse(x));
     }
     
     var keyphrases = item.keyphrases;
