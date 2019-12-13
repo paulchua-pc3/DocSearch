@@ -263,7 +263,7 @@ function display_file(modal, link){
     var s_pages = [];
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
-        var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) );
+        var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );
         var t_line = [];
         if(s_line.length > 0){
             var boxProps = getBoxProperties(s_line[0].boundingBox);
@@ -271,7 +271,7 @@ function display_file(modal, link){
             var y1 = boxProps.top - 10;
             t_line = lines.filter(x => {
                 var leftLimit =  x1 - 20;
-                var rightLimit = x1 + boxProps.width;
+                var rightLimit = x1 + 30;
                 var topMinimum = y1 + boxProps.height;
                 var left = getBoxProperties(x.boundingBox).left;
                 var top = getBoxProperties(x.boundingBox).top;
@@ -294,7 +294,7 @@ function display_file(modal, link){
                 }
             },[]);
             if (t_line.length > 0){                
-                var leftLimit =  x1 + boxProps.width;
+                var leftLimit =  x1 + 30;
                 //var rightLimit = x1 + boxProps.width;
                 var topMinimum = y1;
                 var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
@@ -306,7 +306,10 @@ function display_file(modal, link){
                     return (left > leftLimit && top > topMinimum && top < topMaximum); 
                 }).filter(x => !x.text.match(/^[0-9]+$/));
                 highlightLines(sur_lines);
-                s_pages.push(sur_lines.map(x => x.text).join(" <br/> "));
+                var sorted_sur_lines = sur_lines.sort((a,b) => { 
+                    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+                });
+                s_pages.push(sorted_sur_lines.map(x => x.text).join(" <br/> "));
             }else{
                 s_pages.push("無し");    
             }           
@@ -327,6 +330,8 @@ function display_file(modal, link){
     var datetimeText = resultItem.datetime.join(",");
     var symptomsText = resultItem.symptoms.filter(x => x!="\n").join(",");
     var entitiesDiv = $( "#file_entities" );
+    entitiesDiv.html(`手術:<br/><br/>${surText}`);
+    /* disable for now, while focus is on surgeries extraction use case
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
                      +`Organizations:<br/>${organizationsText}<br/><br/>`
                      +`Locations:<br/>${locationsText}<br/><br/>`
@@ -334,6 +339,7 @@ function display_file(modal, link){
                      +`Datetime:<br/>${datetimeText}<br/><br/>`
                      +`Symptoms:<br/>${symptomsText}<br/><br/>`
                      +`手術:<br/>${surText}`);
+                     */
 }
 
 function display_ocr_image(resultItem) {
