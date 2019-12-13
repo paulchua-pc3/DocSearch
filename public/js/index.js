@@ -514,7 +514,7 @@ function highlightLines(lines){
         var box = $( ".box.tmp" ).clone().css("display","block").attr("class","box act").attr("id","line_"+i).css("left", boxProperties.left)
         .css("top", boxProperties.top).css("width", boxProperties.width).css("height", boxProperties.height);
         
-        $(box).css("background-color","rgba(0,255,0,0.5)").css("border","1px solid yellow");
+        $(box).css("background-color","rgba(0,255,0,0.5)").css("border","1px solid green");
         
         
         $ ("#image_wrapper").append(box);
