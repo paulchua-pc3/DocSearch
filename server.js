@@ -4,6 +4,8 @@ const path = require('path');
 
 const upload = require('./routes/upload');
 
+const closestWords = require('./closestWords');
+
 const express = require('express');
 const app = express();
 
@@ -64,7 +66,7 @@ app.get('/testjson/:id', function (req, res){
   }else{
     res.send(JSON.stringify(testJson));
   }  
-})
+});
 
 app.post('/search', async function (req,res){
   var query = req.body.query;
@@ -113,9 +115,13 @@ app.post('/search', async function (req,res){
   var response = JSON.stringify(responseItems); 
 
   res.send(response);
-})
+});
 
-
+app.get('/closestwords', function (req,res){
+  var query = req.query.query;
+  var list = closestWords(query);
+  res.send(JSON.stringify(list));
+});
 
 const server = app.listen(process.env.PORT || 3000, function(){
     console.log(`Server started on port ${process.env.PORT || 3000}`);

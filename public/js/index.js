@@ -228,6 +228,8 @@ function display_results(results){
     }
 }
 
+var sorted_sur_text = [];
+
 function display_file(modal, link){    
     var filename = link.html();
     modal.find('.modal-title').text(filename);    
@@ -261,6 +263,7 @@ function display_file(modal, link){
     }
 
     var s_pages = [];
+    sorted_sur_text = [];
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
         var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );
@@ -309,7 +312,8 @@ function display_file(modal, link){
                 var sorted_sur_lines = sur_lines.sort((a,b) => { 
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
-                s_pages.push(sorted_sur_lines.map(x => x.text).join(" <br/> "));
+                sorted_sur_text = sorted_sur_lines.map(x => x.text);
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}">${x}<i id="sur_icon_${idx}" class="fa fa-search sur pl-1" aria-hidden="true" style="display:none"></i></div>`).join(""));
             }else{
                 s_pages.push("無し");    
             }           
@@ -330,7 +334,7 @@ function display_file(modal, link){
     var datetimeText = resultItem.datetime.join(",");
     var symptomsText = resultItem.symptoms.filter(x => x!="\n").join(",");
     var entitiesDiv = $( "#file_entities" );
-    entitiesDiv.html(`手術:<br/><br/>${surText}`);
+    entitiesDiv.html(surText);
     /* disable for now, while focus is on surgeries extraction use case
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
                      +`Organizations:<br/>${organizationsText}<br/><br/>`
