@@ -1,6 +1,10 @@
 module.exports = function(query) {
     const fs = require('fs');    
-    var words = fs.readFileSync('./words.csv','utf-8').split("\r\n").filter((x)=>x!="");
+    var wordsCsv = fs.readFileSync('./words.csv','utf-8')
+    var words = wordsCsv.split("\r\n").filter((x)=>x!="");
+    if (!wordsCsv.match("\r")){
+        words = wordsCsv.split("\n").filter((x)=>x!="");
+    }
     var list = words.slice(0);    
     
     //using levenshtein distance
