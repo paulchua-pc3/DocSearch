@@ -32,5 +32,30 @@ em{
 
 #clear_filters{
 	padding: 6px 18px;
-	text-align: center;
+	text-align: center;	
+}
+
+#edit-btn{
+	margin-left: 200px;
+}
+
+#export-btn{
+	margin-left: 20px;
+}
+
+#edit_mode_label{
+	visibility: hidden;	
+	width: max-content;
+	color: red;
+	margin-bottom: 5px;
+}
+
+#save-btn{
+	margin-left: 50px;
+	font-size: 14px;
+}
+
+#cancel-btn{
+	margin-left: 20px;
+	font-size: 14px;
 }

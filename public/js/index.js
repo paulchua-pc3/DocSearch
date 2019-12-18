@@ -130,6 +130,18 @@ $( document ).ready( function() {
     $('#next').click(onNextPage);
     /**pdf viewer end */
 
+    /**edit mode start*/
+    $('#edit-btn').click(function() {
+        $('.fa.fa-search.sur_edit').css('display','inline-block');
+        $('#edit_mode_label').css('visibility', 'visible');
+        $('#file_entities').css('border', 'dotted 1px red');
+    });
+    $('#cancel-btn').click(function(){
+        resetEditModeDisplay();
+        //undo changes logic here
+    });
+    /**edit mode end*/
+
 });
  
 function run_indexer(){
@@ -230,7 +242,8 @@ function display_results(results){
 
 var sorted_sur_text = [];
 
-function display_file(modal, link){    
+function display_file(modal, link){       
+    resetEditModeDisplay();
     var filename = link.html();
     modal.find('.modal-title').text(filename);    
     var fileId = link.attr("id");
@@ -313,7 +326,7 @@ function display_file(modal, link){
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
                 sorted_sur_text = sorted_sur_lines.map(x => x.text);
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}">${x}<i id="sur_icon_${idx}" class="fa fa-search sur pl-1" aria-hidden="true" style="display:none"></i></div>`).join(""));
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}">${x}<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" aria-hidden="true" style="display:none"></i></div>`).join(""));
             }else{
                 s_pages.push("無し");    
             }           
@@ -529,4 +542,10 @@ function highlightLines(lines){
         
         $ ("#image_wrapper").append(box);
     }
+}
+
+function resetEditModeDisplay(){
+    $('.fa.fa-search.sur_edit').css('display','none');
+    $('#edit_mode_label').css('visibility', 'hidden');
+    $('#file_entities').css('border', 'none');
 }
