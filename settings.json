@@ -1,5 +1,13 @@
 {
 	"storageAccount": "blobstorageforsearch",
 	"accessKey": "QDS47J6CMiu5O2QKmlnqtZPQpKMPT4um6jXaGM9lsADu+J/fTGagydFJF9wFQ5vEgvZoHAAJpNoTF+qR02YlEQ==",
-	"container": "doccontainer"
+	"container": "doccontainer",
+	"watson_classify": {
+		"url": "https://gateway-tok.watsonplatform.net/assistant/api",
+		"version": "2019-02-28",
+		"apikey": "G4oSvE2asYoXPbrUDcgfux1h7jjNX1ut9gSu85LdWSiO",
+		"workspace_1_id":"1d4ac7d1-5ede-40fd-be33-3d00ec78ea75",
+		"workspace_2_id":"1d4ac7d1-5ede-40fd-be33-3d00ec78ea75",
+		"workspace_3_id":"1d4ac7d1-5ede-40fd-be33-3d00ec78ea75"		
+	}
 }

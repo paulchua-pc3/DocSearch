@@ -123,6 +123,16 @@ app.get('/closestwords', function (req,res){
   res.send(JSON.stringify(list));
 });
 
+app.get('/closestwordsWat', function (req,res){
+  const waCaller = require('./waCaller');
+  var query = req.query.query;
+  var list = "";//[];
+  waCaller(query, function(result){
+    list = result;
+    res.send(JSON.stringify(list));
+  });  
+});
+
 const server = app.listen(process.env.PORT || 3000, function(){
     console.log(`Server started on port ${process.env.PORT || 3000}`);
 });

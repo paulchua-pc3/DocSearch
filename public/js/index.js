@@ -139,7 +139,7 @@ $( document ).ready( function() {
     $('#cancel-btn').click(function(){
         resetEditModeDisplay();
         //undo changes logic here
-    });
+    });    
     /**edit mode end*/
 
 });
@@ -326,7 +326,7 @@ function display_file(modal, link){
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
                 sorted_sur_text = sorted_sur_lines.map(x => x.text);
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}">${x}<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" aria-hidden="true" style="display:none"></i></div>`).join(""));
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright"><span>${x}</span><i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i><div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div></div>`).join(""));
             }else{
                 s_pages.push("無し");    
             }           
@@ -357,6 +357,16 @@ function display_file(modal, link){
                      +`Symptoms:<br/>${symptomsText}<br/><br/>`
                      +`手術:<br/>${surText}`);
                      */
+    //edit buttons
+    $('.sur_drop').on('show.bs.dropdown', function(event){ //.fa.fa-search.sur_edit
+        var div = event.currentTarget;
+        var divId = div.id;
+        var query = $(`#${divId} span`).text();
+        getClosestWords(query, function (result){
+            var dropdown_menu_div = $(`#${divId} div.dropdown-menu`);
+            dropdown_menu_div.html(result.map((x)=>`<a class="dropdown-item" href="#">${x}</a>`).join(""));            
+        });
+    });
 }
 
 function display_ocr_image(resultItem) {
@@ -548,4 +558,22 @@ function resetEditModeDisplay(){
     $('.fa.fa-search.sur_edit').css('display','none');
     $('#edit_mode_label').css('visibility', 'hidden');
     $('#file_entities').css('border', 'none');
+}
+
+function getClosestWords(query, callback){
+    $.ajax({
+        url: window.location.origin + "/closestwords",
+        method: "get",
+        contentType: "application/json; charset=utf-8",
+        data:{
+            "query":query
+        },
+        success: function(result) {
+            var responseJson = JSON.parse(result);
+            callback(responseJson);
+        },
+        error: function(){
+            callback("error");
+        }
+    });
 }
