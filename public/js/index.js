@@ -3,6 +3,9 @@ var query = "";
 var resultsJson = {};
 const wiki_url = "https://ja.wikipedia.org/wiki/";
 
+//sorted 手術 text; used first in display_file
+var sorted_sur_text = [];
+
 /**pdf viewer start */
 var pdfDoc = null,
         pageNum = 1,
@@ -131,11 +134,7 @@ $( document ).ready( function() {
     /**pdf viewer end */
 
     /**edit mode start*/
-    $('#edit-btn').click(function() {
-        $('.fa.fa-search.sur_edit').css('display','inline-block');
-        $('#edit_mode_label').css('visibility', 'visible');
-        $('#file_entities').css('border', 'dotted 1px red');
-    });
+    $('#edit-btn').click(editModeButtonOnClick);
     $('#cancel-btn').click(function(){
         resetEditModeDisplay();
         //undo changes logic here
@@ -240,8 +239,6 @@ function display_results(results){
     }
 }
 
-var sorted_sur_text = [];
-
 function display_file(modal, link){       
     resetEditModeDisplay();
     var filename = link.html();
@@ -276,7 +273,7 @@ function display_file(modal, link){
     }
 
     var s_pages = [];
-    sorted_sur_text = [];
+    sorted_sur_text = [];//use as global variable, for use during edit/correction operation
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
         var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );
@@ -326,7 +323,13 @@ function display_file(modal, link){
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
                 sorted_sur_text = sorted_sur_lines.map(x => x.text);
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright"><span>${x}</span><i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i><div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div></div>`).join(""));
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright">`
+                                                            +`<span class="orig_text">${x}</span>`
+                                                            +`<span class="corrected_text"></span>`
+                                                            +`<span class="code_text"></span>`
+                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
+                                                            +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
+                                                            +`</div>`).join(""));
             }else{
                 s_pages.push("無し");    
             }           
@@ -358,13 +361,14 @@ function display_file(modal, link){
                      +`手術:<br/>${surText}`);
                      */
     //edit buttons
-    $('.sur_drop').on('show.bs.dropdown', function(event){ //.fa.fa-search.sur_edit
+    $('.sur_drop').on('show.bs.dropdown', function(event){
         var div = event.currentTarget;
         var divId = div.id;
-        var query = $(`#${divId} span`).text();
-        getClosestWords(query, function (result){
+        var query = $(`#${divId} span.orig_text`).text();
+        getClosestWords(query, function (result){            
             var dropdown_menu_div = $(`#${divId} div.dropdown-menu`);
-            dropdown_menu_div.html(result.map((x)=>`<a class="dropdown-item" href="#">${x}</a>`).join(""));            
+            dropdown_menu_div.html(result.map((x)=>`<a class="dropdown-item" href="#">${x.text}</a>`).join(""));
+            $('a.dropdown-item').click(editDropdownItemOnClick);
         });
     });
 }
@@ -475,29 +479,29 @@ function renderPage(num) {
     pageRendering = true;
     // Using promise to fetch the page
     pdfDoc.getPage(num).then(function(page) {
-    var viewport = page.getViewport({scale: scale});
-    // can't get sizing to work when using jquery selectors, so comment for now
-    //canvas.css("height", viewport.height);
-    //canvas.css("width", viewport.width);
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;    
+        var viewport = page.getViewport({scale: scale});
+        // can't get sizing to work when using jquery selectors, so comment for now
+        //canvas.css("height", viewport.height);
+        //canvas.css("width", viewport.width);
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;    
 
-    // Render PDF page into canvas context
-    var renderContext = {
-        canvasContext: ctx,
-        viewport: viewport
-    };
-    var renderTask = page.render(renderContext);
+        // Render PDF page into canvas context
+        var renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        var renderTask = page.render(renderContext);
 
-    // Wait for rendering to finish
-    renderTask.promise.then(function() {
-        pageRendering = false;
-        if (pageNumPending !== null) {
-        // New page rendering is pending
-        renderPage(pageNumPending);
-        pageNumPending = null;
-        }
-    });
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+            pageRendering = false;
+            if (pageNumPending !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending);
+            pageNumPending = null;
+            }
+        });
     });
 
     // Update page counters
@@ -521,7 +525,7 @@ function queueRenderPage(num) {
  */
 function onPrevPage() {
     if (pageNum <= 1) {
-    return;
+        return;
     }
     pageNum--;
     queueRenderPage(pageNum);
@@ -532,7 +536,7 @@ function onPrevPage() {
  */
 function onNextPage() {
     if (pageNum >= pdfDoc.numPages) {
-    return;
+        return;
     }
     pageNum++;
     queueRenderPage(pageNum);
@@ -560,6 +564,8 @@ function resetEditModeDisplay(){
     $('#file_entities').css('border', 'none');
 }
 
+//returns list of closest matching words in json format
+// [ {text:"",code:"",kcode:""}, ...]
 function getClosestWords(query, callback){
     $.ajax({
         url: window.location.origin + "/closestwords",
@@ -569,6 +575,7 @@ function getClosestWords(query, callback){
             "query":query
         },
         success: function(result) {
+            //closestwords api returns list of closest matching words in json format
             var responseJson = JSON.parse(result);
             callback(responseJson);
         },
@@ -576,4 +583,38 @@ function getClosestWords(query, callback){
             callback("error");
         }
     });
+}
+
+//returns string: Surgery_Type, Injection_Med, or Irrelevant
+function getWordClassification(query, callback){
+    $.ajax({
+        url: window.location.origin + "/classifyword",
+        method: "get",
+        contentType: "application/json; charset=utf-8",
+        data:{
+            "query":query
+        },
+        success: function(result) {  
+            //classifyword api returns string: Surgery_Type, Injection_Med, or Irrelevant
+            callback(result);
+        },
+        error: function(){
+            callback("error");
+        }
+    });
+}
+
+function editModeButtonOnClick(){    
+        $('.fa.fa-search.sur_edit').css('display','inline-block');
+        $('#edit_mode_label').css('visibility', 'visible');
+        $('#file_entities').css('border', 'dotted 1px red');
+        var surgery_text_div = $('#file_entities div.sur_drop span.orig_text');
+}
+
+function editDropdownItemOnClick(event){
+    var dropdownItem = $(event.currentTarget);
+    var dropdownMenu = dropdownItem.parent();
+    var parentDiv = dropdownMenu.parent();
+    var correctedText = dropdownItem.text();
+    parentDiv.children('span.corrected_text').text(correctedText);
 }

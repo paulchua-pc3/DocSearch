@@ -5,6 +5,7 @@ const path = require('path');
 const upload = require('./routes/upload');
 
 const closestWords = require('./closestWords');
+const waCaller = require('./waCaller');
 
 const express = require('express');
 const app = express();
@@ -119,17 +120,16 @@ app.post('/search', async function (req,res){
 
 app.get('/closestwords', function (req,res){
   var query = req.query.query;
-  var list = closestWords(query);
-  res.send(JSON.stringify(list));
+  waCaller(query, function(result){    
+    var list = closestWords(query,result);
+    res.send(JSON.stringify(list));
+  });  
 });
 
-app.get('/closestwordsWat', function (req,res){
-  const waCaller = require('./waCaller');
-  var query = req.query.query;
-  var list = "";//[];
-  waCaller(query, function(result){
-    list = result;
-    res.send(JSON.stringify(list));
+app.get('/classifyword', function (req,res){  
+  var query = req.query.query;  
+  waCaller(query, function(result){    
+    res.send(result);
   });  
 });
 

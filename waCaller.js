@@ -15,18 +15,8 @@ module.exports = function(query, callback) {
     //console.log("before query");
   
     var params = {
-      workspaceId: config.workspace_1_id
-    };
-
-    if ((query.length > 0) && (query.length <= 10) ){
-        params.workspace_id = config.workspace_1_id;
-    }else if ((query.length > 10) && (query.length <= 20)){
-        params.workspace_id = config.workspace_2_id;
-    }else if (query.length > 20){
-        params.workspace_id = config.workspace_3_id;
-    }else{
-        console.error("query is empty string");
-    }
+      workspaceId: config.workspace_id
+    };   
 
     params.input = { "text": query };
     
@@ -37,7 +27,11 @@ module.exports = function(query, callback) {
           console.error(err);
         } else {
           console.log(JSON.stringify(response.result, null, 2));
-          callback(response.result.intents);
+          if(response.result.intents.length > 0){
+            callback(response.result.intents[0].intent);
+          }else{
+            callback("Irrelevant");
+          }          
         }
       }
     );
