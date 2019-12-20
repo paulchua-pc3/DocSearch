@@ -43,6 +43,10 @@ em{
 	margin-left: 20px;
 }
 
+#entities_export{
+	display: none;
+}
+
 #edit_mode_label{
 	visibility: hidden;	
 	width: max-content;

@@ -43,5 +43,5 @@ module.exports = function(query,type) {
     const similarity = require('jaro-winkler');
     list.sort((a, b) => similarity(query,b.text) - similarity(query,a.text));
     
-    return list.slice(0,5);
+    return list.slice(0,10);
 }

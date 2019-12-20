@@ -6,6 +6,7 @@ const upload = require('./routes/upload');
 
 const closestWords = require('./closestWords');
 const waCaller = require('./waCaller');
+const fs = require('fs');
 
 const express = require('express');
 const app = express();
@@ -131,6 +132,16 @@ app.get('/classifyword', function (req,res){
   waCaller(query, function(result){    
     res.send(result);
   });  
+});
+
+app.post('/entitiesexport', function (req,res){
+  var list = req.body.list;
+  var docname = req.body.docname;
+  var output_string = list.map( x => x.text+","+x.code+","+x.kcode).join("\r\n");
+  var filename = './public/exports/'+docname+'.csv';
+  fs.writeFileSync('./public/exports/'+docname+'.csv',output_string);
+  var href = '/exports/'+docname+'.csv'
+  res.send(href);
 });
 
 const server = app.listen(process.env.PORT || 3000, function(){

@@ -138,7 +138,8 @@ $( document ).ready( function() {
     $('#cancel-btn').click(function(){
         resetEditModeDisplay();
         //undo changes logic here
-    });    
+    });
+    $('#export-btn').click(exportButtonOnClick);
     /**edit mode end*/
 
 });
@@ -666,4 +667,36 @@ function editDropdownItemOnClick(event){
     var correctedText = dropdownItem.text();
     //search descendants for span with class corrected_text
     $(parentDiv).find('span.corrected_text').text(correctedText);
+}
+
+function exportButtonOnClick(){
+    var entities_div = $('#file_entities div.sur_drop');
+    var entities_list = [];
+    entities_div.each( function(i,item){
+        if ($(item).find('span.corrected_text')[0].innerText != ""){
+            var text = $(item).find('span.corrected_text')[0].innerText;
+            var code = $(item).find('span.code_text')[0].innerText;             
+            var kcode = $(item).find('span.kcode_text')[0].innerText;
+            var list_item = {"text":text, "code":code, "kcode":kcode};
+            entities_list.push(list_item);
+        }
+    });
+    var docname = $('h5.modal-title').text();
+    $.ajax({
+        url: window.location.origin + "/entitiesexport",
+        method: "post",
+        contentType: "application/json; charset=utf-8",
+        data:JSON.stringify({
+            "list":entities_list,
+            "docname": docname
+        }),
+        success: function(result) {  
+            $('a#entities_export').attr('href',result);
+            $('a#entities_export')[0].click();
+        },
+        error: function(){
+            console.log("error");
+        }
+    });
+
 }
