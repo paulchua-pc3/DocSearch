@@ -60,7 +60,29 @@ em{
 	font-size: 14px;
 }
 
+#file_entities div[class^=col-]{
+	border: 0.5px solid rgba(86,61,124,.2);
+}
+
+span.orig_text{
+	font-size: 14px;
+}
+
 span.corrected_text{
-	margin-left: 20px;
-	color: red;
+	font-size: 14px;
+	color: blue;	
+}
+
+span.code_text{
+	font-size: 12px;	
+}
+span.kcode_text{
+	font-size: 12px;	
+}
+
+#analyze_in_progress{
+	display: none;
+}
+#analyze_finished{
+	display: none;
 }

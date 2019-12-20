@@ -323,12 +323,22 @@ function display_file(modal, link){
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
                 sorted_sur_text = sorted_sur_lines.map(x => x.text);
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright">`
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                                                            +`<div class="col-lg-5 p-0">`
                                                             +`<span class="orig_text">${x}</span>`
-                                                            +`<span class="corrected_text"></span>`
-                                                            +`<span class="code_text"></span>`
-                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-4 p-0">`
+                                                            +`<span class="corrected_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-2 p-0">`
+                                                            +`<span class="code_text ml-2"></span>`
+                                                            +`<br/>`                                                            
+                                                            +`<span class="kcode_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-1 p-0">`
+                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1 ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
                                                             +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
+                                                            +`</div>`
                                                             +`</div>`).join(""));
             }else{
                 s_pages.push("無し");    
@@ -361,7 +371,7 @@ function display_file(modal, link){
                      +`手術:<br/>${surText}`);
                      */
     //edit buttons
-    $('.sur_drop').on('show.bs.dropdown', function(event){
+    /*$('.sur_drop').on('show.bs.dropdown', function(event){
         var div = event.currentTarget;
         var divId = div.id;
         var query = $(`#${divId} span.orig_text`).text();
@@ -370,7 +380,7 @@ function display_file(modal, link){
             dropdown_menu_div.html(result.map((x)=>`<a class="dropdown-item" href="#">${x.text}</a>`).join(""));
             $('a.dropdown-item').click(editDropdownItemOnClick);
         });
-    });
+    });*/
 }
 
 function display_ocr_image(resultItem) {
@@ -559,9 +569,11 @@ function highlightLines(lines){
 }
 
 function resetEditModeDisplay(){
-    $('.fa.fa-search.sur_edit').css('display','none');
+    $('.fa.fa-search.sur_edit').css('display','none');    
     $('#edit_mode_label').css('visibility', 'hidden');
-    $('#file_entities').css('border', 'none');
+    $('#analyze_in_progress').css('display', 'none');
+    $('#analyze_finished').css('display', 'none');
+    $('#file_entities').css('border', 'none');    
 }
 
 //returns list of closest matching words in json format
@@ -605,16 +617,53 @@ function getWordClassification(query, callback){
 }
 
 function editModeButtonOnClick(){    
-        $('.fa.fa-search.sur_edit').css('display','inline-block');
+        //$('.fa.fa-search.sur_edit').css('display','inline-block');
         $('#edit_mode_label').css('visibility', 'visible');
+        $('#analyze_in_progress').css('display', 'inline-block');
         $('#file_entities').css('border', 'dotted 1px red');
         var surgery_text_div = $('#file_entities div.sur_drop span.orig_text');
+        if (surgery_text_div.length > 0){
+            var in_progress_count = surgery_text_div.length;
+            //use .each() here instead of normal for loop so that value of i is retained inside getClosestWords callback( function(result){} )
+            $('#file_entities div.sur_drop span.orig_text').each( function (i, item){
+                var query = surgery_text_div[i].innerText;
+                getClosestWords(query, function(result){
+                    if (result.length > 0){
+                        $(`#sur_${i} span.corrected_text`).text(result[0].text);
+                        $(`#sur_${i} span.code_text`).text(result[0].code);
+                        if (result[0].kcode){
+                            $(`#sur_${i} span.kcode_text`).text(result[0].kcode);
+                        }else{
+                            $(`#sur_${i} span.kcode_text`).text("");
+                        }
+                        var dropdown_menu_div = $(`#sur_${i} div.dropdown-menu`);
+                        dropdown_menu_div.html(result.map((x)=>`<a class="dropdown-item" href="#">${x.text}</a>`).join(""));
+                        $('a.dropdown-item').click(editDropdownItemOnClick);
+                        $(`#sur_${i} .fa.fa-search.sur_edit`).css('display','inline-block');
+                    }else{
+                        $(`#sur_${i} span.corrected_text`).text("");
+                        $(`#sur_${i} span.code_text`).text("");
+                        $(`#sur_${i} span.kcode_text`).text("");
+                        $(`#sur_${i} .fa.fa-search.sur_edit`).css('display','none');
+                    }
+                    in_progress_count--;
+                    if (in_progress_count == 0){
+                        $('#analyze_in_progress').css('display', 'none');
+                        $('#analyze_finished').css('display', 'inline-block');
+                    }                    
+                });
+            });         
+        }else{
+            $('#analyze_in_progress').css('display', 'none');
+            $('#analyze_finished').css('display', 'inline-block');
+        }
 }
 
 function editDropdownItemOnClick(event){
     var dropdownItem = $(event.currentTarget);
     var dropdownMenu = dropdownItem.parent();
-    var parentDiv = dropdownMenu.parent();
+    var parentDiv = $(dropdownMenu).parents('div.sur_drop');
     var correctedText = dropdownItem.text();
-    parentDiv.children('span.corrected_text').text(correctedText);
+    //search descendants for span with class corrected_text
+    $(parentDiv).find('span.corrected_text').text(correctedText);
 }

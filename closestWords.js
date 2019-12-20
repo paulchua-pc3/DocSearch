@@ -1,6 +1,6 @@
 //params: query - word to match, type - Surgery_Type (use surgery list), or Injection_Med (use injection list)
 module.exports = function(query,type) {
-    if (type == "Irrelevant"){
+    if (type == "Irrelevant" || query == "手術材料" || query == "術材料" || query == "手術薬剤"){
         var list = [];
         return list;
     }
@@ -43,5 +43,5 @@ module.exports = function(query,type) {
     const similarity = require('jaro-winkler');
     list.sort((a, b) => similarity(query,b.text) - similarity(query,a.text));
     
-    return list.slice(0,3);
+    return list.slice(0,5);
 }
