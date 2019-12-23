@@ -128,7 +128,7 @@ app.get('/closestwords', function (req,res){
 });
 
 app.get('/classifyword', function (req,res){  
-  var query = req.query.query;  
+  var query = req.query.query;
   waCaller(query, function(result){    
     res.send(result);
   });  
@@ -143,6 +143,28 @@ app.post('/entitiesexport', function (req,res){
   var href = '/exports/'+docname+'.csv'
   res.send(href);
 });
+
+//used to convert double-byte numbers and letters inside csv to single-byte
+//(use only when server is in Windows environment, i.e. not when deployed in azure, because of CRLF(windows) vs LF(linux) issue)
+app.get('/preprocesscsv', function (req,res){
+  var filename = req.query.filename;
+  var fileContents = fs.readFileSync('./'+filename,'utf-8');
+  var newFileContents = fileContents.split("\r\n").map((line) => {
+    var c = line;
+    var regex = /[\uff01-\uff5e]+/g;
+    if (c.match(regex)){
+      var a = [...c.match(regex)];    
+      a.forEach((x,i) => {
+        var arr = x.split("");
+        var newString = arr.map((x) => String.fromCharCode(x.charCodeAt(0)-65248)).join("");
+        c = c.replace(x,newString);      
+      })
+    }    
+    return c;
+  }).join("\r\n");
+  fs.writeFileSync('./new_'+filename,newFileContents);
+  res.send("done");
+})
 
 const server = app.listen(process.env.PORT || 3000, function(){
     console.log(`Server started on port ${process.env.PORT || 3000}`);
