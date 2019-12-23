@@ -150,17 +150,25 @@ app.get('/preprocesscsv', function (req,res){
   var filename = req.query.filename;
   var fileContents = fs.readFileSync('./'+filename,'utf-8');
   var newFileContents = fileContents.split("\r\n").map((line) => {
-    var c = line;
+    var str = line;
     var regex = /[\uff01-\uff5e]+/g;
-    if (c.match(regex)){
-      var a = [...c.match(regex)];    
+    if (str.match(regex)){
+      var a = [...str.match(regex)];    
       a.forEach((x,i) => {
         var arr = x.split("");
-        var newString = arr.map((x) => String.fromCharCode(x.charCodeAt(0)-65248)).join("");
-        c = c.replace(x,newString);      
+        var newString = arr.map((x) => {
+          var newChar = String.fromCharCode(x.charCodeAt(0)-65248);
+          //replace with single-byte only if not ',' and '"' (to avoid breaking csv format)
+          if ((newChar != ",") && (newChar != '"')){
+            return newChar;
+          }else{
+            return x;
+          }
+        }).join("");
+        str = str.replace(x,newString);
       })
     }    
-    return c;
+    return str;
   }).join("\r\n");
   fs.writeFileSync('./new_'+filename,newFileContents);
   res.send("done");
