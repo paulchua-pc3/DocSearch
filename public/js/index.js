@@ -3,6 +3,11 @@ var query = "";
 var resultsJson = {};
 const wiki_url = "https://ja.wikipedia.org/wiki/";
 
+var doc_result_item = null;
+//container for sur_lines; 1 page : 1 sur_lines; used first in display_file
+var sur_lines_pages = [];
+//container for sorted_sur_text; 1 page : 1 sorted_sur_text; used first in display_file
+var s_pages = [];
 //sorted 手術 text; used first in display_file
 var sorted_sur_text = [];
 
@@ -15,6 +20,7 @@ var pdfDoc = null,
         canvas = null,
         ctx = null,
         pdfjsLib = null;
+var numPages = 0;
 /**pdf viewer end */
 
 $( document ).ready( function() {
@@ -247,18 +253,20 @@ function display_file(modal, link){
     var fileId = link.attr("id");
     var resultIndex = parseInt(fileId.split("file")[1]);    
     var resultItem = resultsJson[resultIndex];
+    doc_result_item = resultItem;
     /**pdf viewer start */
-    if (filename.match(/\.pdf$/i) != null){
+    /*if (filename.match(/\.pdf$/i) != null){
         pageNum = 1;
         pageRendering = false;
         pageNumPending = null;
         $('#image_viewer').css("display","none");
         $('#pdf_viewer').css("display","block");
         var uri = resultItem.fileUri;
+    */
         /**
          * Asynchronously downloads PDF.
          */
-        pdfjsLib.getDocument(uri).promise.then(function(pdfDoc_) {
+    /*    pdfjsLib.getDocument(uri).promise.then(function(pdfDoc_) {
             pdfDoc = pdfDoc_;
             $('#page_count').text(pdfDoc.numPages);
 
@@ -266,14 +274,19 @@ function display_file(modal, link){
             renderPage(pageNum);
 
         });
+    */
     /**pdf viewer end */        
-    }else{
+    /*}else{*/
+        pageNum = 1;
+        numPages = resultItem.normalizedImages.length;
+        $('#page_count').text(numPages);
         $('#pdf_viewer').css("display","none");
         $('#image_viewer').css("display","block");
         display_ocr_image(resultItem);
-    }
-
-    var s_pages = [];
+    //}
+    
+    s_pages = [];//use as global variable
+    sur_lines_pages = [];//use as global variable
     sorted_sur_text = [];//use as global variable, for use during edit/correction operation
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
@@ -307,7 +320,7 @@ function display_file(modal, link){
                     }                    
                 }
             },[]);
-            if (t_line.length > 0){                
+            if (t_line.length > 0){
                 var leftLimit =  x1 + 30;
                 //var rightLimit = x1 + boxProps.width;
                 var topMinimum = y1;
@@ -319,7 +332,7 @@ function display_file(modal, link){
                     var top = getBoxProperties(x.boundingBox).top;
                     return (left > leftLimit && top > topMinimum && top < topMaximum); 
                 }).filter(x => !x.text.match(/^[0-9]+$/));
-                highlightLines(sur_lines);
+                sur_lines_pages.push(sur_lines);
                 var sorted_sur_lines = sur_lines.sort((a,b) => { 
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
                 });
@@ -342,17 +355,20 @@ function display_file(modal, link){
                                                             +`</div>`
                                                             +`</div>`).join(""));
             }else{
-                s_pages.push("無し");    
+                s_pages.push("無し");
+                sur_lines_pages.push([]);
             }           
             
         }else{
             s_pages.push("無し");
+            sur_lines_pages.push([]);
         }
     }
-    var surText = "";
-    if (s_pages.length > 0){
+    $('#page_num').text(pageNum);   
+    display_entities();    
+    /*if (s_pages.length > 0){
         surText = s_pages.join(" <br/>---<br/> ");
-    }
+    }*/
 
     var keyphrasesText = resultItem.keyphrases.slice(0,10).join(",")+",...";
     var organizationsText = getWikipediaLinksHtml(resultItem.organizations);
@@ -360,8 +376,7 @@ function display_file(modal, link){
     var peopleText = resultItem.people.join(",");
     var datetimeText = resultItem.datetime.join(",");
     var symptomsText = resultItem.symptoms.filter(x => x!="\n").join(",");
-    var entitiesDiv = $( "#file_entities" );
-    entitiesDiv.html(surText);
+   
     /* disable for now, while focus is on surgeries extraction use case
     entitiesDiv.html(`Keyphrases:<br/>${keyphrasesText}<br/><br/>`
                      +`Organizations:<br/>${organizationsText}<br/><br/>`
@@ -384,6 +399,15 @@ function display_file(modal, link){
     });*/
 }
 
+function display_entities(){
+    var surText = "";
+    if (s_pages[pageNum-1]){
+        surText = s_pages[pageNum-1]
+    }
+    var entitiesDiv = $( "#file_entities" );
+    entitiesDiv.html(surText);
+}
+
 function display_ocr_image(resultItem) {
     //clear all ocr highlight boxes first
     $(".box.act").remove();
@@ -391,6 +415,10 @@ function display_ocr_image(resultItem) {
     docImg.css("width", "");
     docImg.css("height", "");  
     var uri = resultItem.fileUri;
+    if (uri.match(/\.pdf$/i) != null){
+        var imageData = JSON.parse(resultItem.normalizedImages[pageNum-1]);
+        uri = "data:image/png;base64,"+imageData.data;
+    }
     docImg.attr("src",uri);
     docImg.on("load", function(){
         var width = docImg.prop("naturalWidth");
@@ -410,7 +438,7 @@ function display_ocr_image(resultItem) {
         
         var words = [];
         if (resultItem.layoutText && resultItem.layoutText.length > 0){
-            words = resultItem.layoutText[0].words;
+            words = resultItem.layoutText[pageNum-1].words;
         }
         var words_in_line_counter = 0;
         var queryWords = query.split(/\s+/);
@@ -449,6 +477,7 @@ function display_ocr_image(resultItem) {
             }
         }
         docImg.off("load");
+        highlightLines(sur_lines_pages[pageNum-1]);
     });
 }
 
@@ -519,17 +548,6 @@ function renderPage(num) {
     $('#page_num').text(num);
 }
 
-/**
- * If another page rendering in progress, waits until the rendering is
- * finised. Otherwise, executes rendering immediately.
- */
-function queueRenderPage(num) {
-    if (pageRendering) {
-    pageNumPending = num;
-    } else {
-    renderPage(num);
-    }
-}
 
 /**
  * Displays previous page.
@@ -539,18 +557,24 @@ function onPrevPage() {
         return;
     }
     pageNum--;
-    queueRenderPage(pageNum);
+    $('#page_num').text(pageNum);    
+    display_ocr_image(doc_result_item);
+    display_entities();
+    
 }
 
 /**
  * Displays next page.
  */
 function onNextPage() {
-    if (pageNum >= pdfDoc.numPages) {
+    if (pageNum >= numPages) {
         return;
     }
     pageNum++;
-    queueRenderPage(pageNum);
+    $('#page_num').text(pageNum);
+    display_ocr_image(doc_result_item);
+    display_entities();
+    
 }
 
 /**pdf viewer end */
