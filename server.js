@@ -139,7 +139,7 @@ app.post('/entitiesexport', function (req,res){
   var docname = req.body.docname;
   var output_string = list.map( x => x.text+","+x.code+","+x.kcode).join("\r\n");
   var filename = './public/exports/'+docname+'.csv';
-  fs.writeFileSync('./public/exports/'+docname+'.csv',output_string);
+  fs.writeFileSync(filename, output_string);
   var href = '/exports/'+docname+'.csv'
   res.send(href);
 });
