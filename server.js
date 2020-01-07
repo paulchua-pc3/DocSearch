@@ -74,7 +74,6 @@ app.post('/search', async function (req,res){
   var query = req.body.query;
   var filter = req.body.filter;
   const searchClient = new SearchClient(searchConfig);
-  console.log(query);
   var result = await searchClient.exec_search(query, filter);
   var resultJson = JSON.parse(result);
   var resultCount = resultJson["@odata.count"];

@@ -85,7 +85,7 @@ class SearchClient {
         var url = `https://${this.searchServiceName}.search.windows.net/indexes/${this.indexName}/docs?api-version=${this.apiVersion}&queryType=simple&searchMode=all&highlight=mergedText&$count=true&search=`;
         
         var query_encoded = encodeURIComponent(query);
-        console.log(url+query_encoded + filter);
+        
         var options = { 
             "url" : url+query_encoded + filter,
             "headers" : {
