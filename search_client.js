@@ -12,7 +12,7 @@ class SearchClient {
     //api call to run indexer, returns {result:"success"} on successful start
     run_indexer() {
         var url = `https://${this.searchServiceName}.search.windows.net/indexers/${this.indexerName}/run?api-version=${this.apiVersion}`;
-        
+        console.log(url);
         var options = { 
             "url" : url,            
             "headers" : {
