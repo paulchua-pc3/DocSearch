@@ -10,6 +10,8 @@ var sur_lines_pages = [];
 var s_pages = [];
 //sorted 手術 text; used first in display_file
 var sorted_sur_text = [];
+//debug code, for showing all lines of text
+var lines_pages = [];
 
 /**pdf viewer start */
 var pdfDoc = null,
@@ -288,6 +290,7 @@ function display_file(modal, link){
     s_pages = [];//use as global variable
     sur_lines_pages = [];//use as global variable
     sorted_sur_text = [];//use as global variable, for use during edit/correction operation
+    lines_pages = [];//debug code, for showing all lines of text
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
         var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );
@@ -331,7 +334,7 @@ function display_file(modal, link){
                     var left = getBoxProperties(x.boundingBox).left;
                     var top = getBoxProperties(x.boundingBox).top;
                     return (left > leftLimit && top > topMinimum && top < topMaximum); 
-                }).filter(x => !x.text.match(/^[0-9]+$/));
+                }).filter(x => !x.text.match(/^[0-9]+$/));                
                 sur_lines_pages.push(sur_lines);
                 var sorted_sur_lines = sur_lines.sort((a,b) => { 
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
@@ -363,6 +366,8 @@ function display_file(modal, link){
             s_pages.push("無し");
             sur_lines_pages.push([]);
         }
+        //debug code, for showing all lines of text
+        lines_pages.push(lines);
     }
     $('#page_num').text(pageNum);   
     display_entities();    
@@ -404,6 +409,13 @@ function display_entities(){
     if (s_pages[pageNum-1]){
         surText = s_pages[pageNum-1]
     }
+    //debug code start, for showing all text
+    var sorted_lines = lines_pages[pageNum-1].sort((a,b) => { 
+        return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+    });
+    sorted_text = sorted_lines.map(x => x.text);
+    //surText = sorted_text;
+    //debug code end
     var entitiesDiv = $( "#file_entities" );
     entitiesDiv.html(surText);
 }
@@ -477,6 +489,8 @@ function display_ocr_image(resultItem) {
             }
         }
         docImg.off("load");
+        //debug code, for showing all lines of text        
+        //highlightLines(lines_pages[pageNum-1]);
         highlightLines(sur_lines_pages[pageNum-1]);
     });
 }
