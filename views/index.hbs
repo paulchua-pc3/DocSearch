@@ -34,21 +34,33 @@
 		<div class="tab-content" id="myTabContent">
 			<!-- Search Tab -->
 			<div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
-				<form id="search-form" action="/search">
+				<form id="search-form" action="">
 					<div class="row no-gutters">
 						<div class="col-5 pl-4 pt-4 m-0">
 							<input type="text" placeholder="Enter your query here" name="search" id="search_input">
 						</div>
 						<div class="col-2 pt-4 m-0">
-							<button type="submit" class="btn btn-primary">Search</button>
+							<button type="submit" class="btn btn-primary" id="search_btn">Search</button>
 						</div>
 					</div>
 					<div class="row no-gutters">
+						<div class="pl-4 pt-4 m-0">
+							<label for="search_buttons">Predefined Searches:</label>
+						</div>
+						<div class="pl-4 pt-4 m-0">
+							<button type="submit" class="btn btn-success" id="sur_search">手術</button>
+						</div>
+						<div class="pl-4 pt-4 m-0">
+							<button type="submit" class="btn btn-success" id="dpc_search">DPC</button>
+						</div>
+					</div>
+
+					<div class="row no-gutters" hidden>
 						<div class="col-5 pl-4 pt-2 m-0">
 							<label for="entity_filters"><strong>SHOW DOCUMENTS WITH THE FOLLOWING:</strong></label>
 						</div>
 					</div>
-					<div class="row no-gutters">
+					<div class="row no-gutters" hidden>
 						<div class="col-1 pl-5 pt-2 m-0">
 							<label for="organizations_category">Organizations</label>
 						</div>
@@ -56,7 +68,7 @@
 							<input type="text" aria-label="Text input with dropdown button" id="filter_org">
 						</div>
 					</div>
-					<div class="row no-gutters">
+					<div class="row no-gutters" hidden>
 						<div class="col-1 pl-5 pt-2 m-0">
 							<label for="people_category">People</label>
 						</div>
@@ -64,7 +76,7 @@
 							<input type="text" aria-label="Text input with dropdown button" id="filter_people">
 						</div>
 					</div>
-					<div class="row no-gutters">
+					<div class="row no-gutters" hidden>
 						<div class="col-1 pl-5 pt-2 m-0">
 							<label for="locations_category">Locations</label>
 						</div>
@@ -72,7 +84,7 @@
 							<input type="text" aria-label="Text input with dropdown button" id="filter_loc">
 						</div>
 					</div>
-					<div class="row no-gutters">
+					<div class="row no-gutters" hidden>
 						<div class="col-1 pl-5 pt-2 m-0">
 							<label for="year_category">Year</label>
 						</div>
@@ -80,7 +92,7 @@
 							<input type="text" aria-label="Text input with dropdown button" id="filter_year">
 						</div>
 					</div>
-					<div class="row no-gutters">
+					<div class="row no-gutters" hidden>
 						<div class="col-md-5 offset-md-5">
 							<input type="button" class="btn btn-primary" id="clear_filters" value="Clear" />
 						</div>
@@ -195,7 +207,7 @@
 									<label for="file_entities"><strong>Entities:</strong></label><button id="edit-btn">解析</button><button id="export-btn">エクスポート</button>
 									<a id="entities_export" href="" target="_blank" rel="noopener noreferrer" download></a>
 									<br/>
-									<span>手術:</span>
+									<span id="entities_label">手術:</span>
 									<br/>
 									<div id="edit_mode_label" class="mx-auto"><span id="analyze_in_progress">解析中…</span><span id="analyze_finished">解析完了</span><button id="save-btn">保存</button><button id="cancel-btn">キャンセル</button></div>
 									<div id="file_entities"></div>

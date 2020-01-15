@@ -3,15 +3,29 @@ var query = "";
 var resultsJson = {};
 const wiki_url = "https://ja.wikipedia.org/wiki/";
 
+//used to store the json data for the document being viewed in the modal
 var doc_result_item = null;
+
 //container for sur_lines; 1 page : 1 sur_lines; used first in display_file
 var sur_lines_pages = [];
+
 //container for sorted_sur_text; 1 page : 1 sorted_sur_text; used first in display_file
 var s_pages = [];
+
 //sorted 手術 text; used first in display_file
 var sorted_sur_text = [];
+
 //debug code, for showing all lines of text
 var lines_pages = [];
+
+var SearchModeEnum = {
+    "Standard": "standard",
+    "Surgeries": "surgeries",
+    "DPC": "dpc"
+}
+
+//standard, surgeries, dpc
+var search_mode = SearchModeEnum.Standard;
 
 /**pdf viewer start */
 var pdfDoc = null,
@@ -55,62 +69,16 @@ $( document ).ready( function() {
         });
     });
 
-    $("#search-form").submit(function(event){
-        event.preventDefault();
-        $(".results").html("");//clear result area
-        query = $("input[name='search']").val();
-        org = $('#filter_org').val();
-        people = $('#filter_people').val();
-        loc = $('#filter_loc').val();
-        year = $('#filter_year').val();
+    $("#search_btn").click(execute_search);// main/general-purpose search button
+    $("#sur_search").click(execute_search);// search button for surgeries
+    $("#dpc_search").click(execute_search);// search button for DPC/入院
 
-        filter = "";
-        has_filter = false;
-        if (org){
-            filter += "organizations/any(o: o eq "+"\'"+org.replace(/^\s+|\s+$/g,'')+"\')";
-            has_filter = true;
+    // allows the user to execute search using "enter" key
+    $("input[name='search']").keypress(function(event){
+        if(event.keyCode==13){
+            event.preventDefault();
+            execute_search(event);
         }
-        if (people){
-            if (org){
-                filter += " and ";
-            }
-            filter += "people/any(p: p eq "+"\'"+people.replace(/^\s+|\s+$/g,'')+"\')";
-            has_filter = true;
-        }
-        if (loc) {
-            if (org || people){
-                filter += " and ";
-            }
-            filter += "locations/any(l: l eq "+"\'"+loc.replace(/^\s+|\s+$/g,'')+"\')";
-            has_filter = true;
-        }
-        if (year){
-            if (org || people || loc){
-                filter += " and ";
-            }
-            filter += "datetime/any(d: d eq "+"\'"+year.replace(/^\s+|\s+$/g,'')+"\')";
-            has_filter = true;
-        }
-        if (!has_filter){
-            filter = "";
-        } else {
-            encoded_filter = encodeURIComponent(filter);
-            filter = "&" + encodeURIComponent("$filter") + "=" + encoded_filter;
-        }
-        
-        $.ajax({
-            url: "/search",
-            method: "post",
-            data: JSON.stringify({"query":query,"filter":filter}),
-            contentType: "application/json; charset=utf-8",
-            success: function(results){
-                resultsJson = JSON.parse(results);
-                display_results(resultsJson);
-            },
-            error: function (error) {
-                console.log("error on search:", error);                
-            }
-        });
     });
 
     $('#clear_filters').click(function() {
@@ -151,7 +119,84 @@ $( document ).ready( function() {
     /**edit mode end*/
 
 });
- 
+
+function execute_search(event){
+    event.preventDefault();
+    $(".results").html("");//clear result area
+
+    //set query based on button clicked
+    var currentTarget = event.currentTarget.id
+    if (currentTarget && currentTarget == "sur_search" || currentTarget == "dpc_search" ){
+        
+        if (currentTarget == "sur_search"){
+            search_mode = SearchModeEnum.Surgeries;
+            //use predefined query for surgeries
+            query = "手術";
+        }else if (currentTarget == "dpc_search"){
+            search_mode = SearchModeEnum.DPC;
+            //use predefined query for DPC/入院
+            query = "DPC";
+        }        
+
+    }else{
+        search_mode = SearchModeEnum.Standard;
+        //use user's input as query
+        query = $("input[name='search']").val();
+    }    
+    org = $('#filter_org').val();
+    people = $('#filter_people').val();
+    loc = $('#filter_loc').val();
+    year = $('#filter_year').val();
+
+    filter = "";
+    has_filter = false;
+    if (org){
+        filter += "organizations/any(o: o eq "+"\'"+org.replace(/^\s+|\s+$/g,'')+"\')";
+        has_filter = true;
+    }
+    if (people){
+        if (org){
+            filter += " and ";
+        }
+        filter += "people/any(p: p eq "+"\'"+people.replace(/^\s+|\s+$/g,'')+"\')";
+        has_filter = true;
+    }
+    if (loc) {
+        if (org || people){
+            filter += " and ";
+        }
+        filter += "locations/any(l: l eq "+"\'"+loc.replace(/^\s+|\s+$/g,'')+"\')";
+        has_filter = true;
+    }
+    if (year){
+        if (org || people || loc){
+            filter += " and ";
+        }
+        filter += "datetime/any(d: d eq "+"\'"+year.replace(/^\s+|\s+$/g,'')+"\')";
+        has_filter = true;
+    }
+    if (!has_filter){
+        filter = "";
+    } else {
+        encoded_filter = encodeURIComponent(filter);
+        filter = "&" + encodeURIComponent("$filter") + "=" + encoded_filter;
+    }
+    
+    $.ajax({
+        url: "/search",
+        method: "post",
+        data: JSON.stringify({"query":query,"filter":filter}),
+        contentType: "application/json; charset=utf-8",
+        success: function(results){
+            resultsJson = JSON.parse(results);
+            display_results(resultsJson);
+        },
+        error: function (error) {
+            console.log("error on search:", error);                
+        }
+    });
+}
+
 function run_indexer(){
     $.ajax({
         url: window.location.origin + "/indexer/run",
@@ -256,119 +301,17 @@ function display_file(modal, link){
     var resultIndex = parseInt(fileId.split("file")[1]);    
     var resultItem = resultsJson[resultIndex];
     doc_result_item = resultItem;
-    /**pdf viewer start */
-    /*if (filename.match(/\.pdf$/i) != null){
-        pageNum = 1;
-        pageRendering = false;
-        pageNumPending = null;
-        $('#image_viewer').css("display","none");
-        $('#pdf_viewer').css("display","block");
-        var uri = resultItem.fileUri;
-    */
-        /**
-         * Asynchronously downloads PDF.
-         */
-    /*    pdfjsLib.getDocument(uri).promise.then(function(pdfDoc_) {
-            pdfDoc = pdfDoc_;
-            $('#page_count').text(pdfDoc.numPages);
-
-            // Initial/first page rendering
-            renderPage(pageNum);
-
-        });
-    */
-    /**pdf viewer end */        
-    /*}else{*/
-        pageNum = 1;
-        numPages = resultItem.normalizedImages.length;
-        $('#page_count').text(numPages);
-        $('#pdf_viewer').css("display","none");
-        $('#image_viewer').css("display","block");
-        display_ocr_image(resultItem);
-    //}
-    
-    s_pages = [];//use as global variable
-    sur_lines_pages = [];//use as global variable
-    sorted_sur_text = [];//use as global variable, for use during edit/correction operation
-    lines_pages = [];//debug code, for showing all lines of text
-    for (var i = 0; i < resultItem.layoutText.length; i++){
-        var lines = resultItem.layoutText[i].lines;
-        var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );
-        var t_line = [];
-        if(s_line.length > 0){
-            var boxProps = getBoxProperties(s_line[0].boundingBox);
-            var x1 = boxProps.left;
-            var y1 = boxProps.top - 10;
-            t_line = lines.filter(x => {
-                var leftLimit =  x1 - 20;
-                var rightLimit = x1 + 30;
-                var topMinimum = y1 + boxProps.height;
-                var left = getBoxProperties(x.boundingBox).left;
-                var top = getBoxProperties(x.boundingBox).top;
-                return (left > leftLimit && left < rightLimit && top > topMinimum); 
-            }).reduce((prev, x) => {               
-                if (prev.length == 0){
-                    var arr = [];
-                    arr.push(x);
-                    return arr;
-                }else{
-                    var prevTop = getBoxProperties(prev[0].boundingBox).top;
-                    var xTop = getBoxProperties(x.boundingBox).top;                    
-                    if (prevTop < xTop ){
-                        return prev;
-                    }else{                        
-                        var arr = [];
-                        arr.push(x);
-                        return arr;
-                    }                    
-                }
-            },[]);
-            if (t_line.length > 0){
-                var leftLimit =  x1 + 30;
-                //var rightLimit = x1 + boxProps.width;
-                var topMinimum = y1;
-                var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
-                var topMaximum = t_lineBoxProps.top - 5;
-                var sur_lines = [];
-                sur_lines = lines.filter(x => {                    
-                    var left = getBoxProperties(x.boundingBox).left;
-                    var top = getBoxProperties(x.boundingBox).top;
-                    return (left > leftLimit && top > topMinimum && top < topMaximum); 
-                }).filter(x => !x.text.match(/^[0-9]+$/));                
-                sur_lines_pages.push(sur_lines);
-                var sorted_sur_lines = sur_lines.sort((a,b) => { 
-                    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
-                });
-                sorted_sur_text = sorted_sur_lines.map(x => x.text);
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
-                                                            +`<div class="col-lg-5 p-0">`
-                                                            +`<span class="orig_text">${x}</span>`
-                                                            +`</div>`
-                                                            +`<div class="col-lg-4 p-0">`
-                                                            +`<span class="corrected_text ml-2"></span>`
-                                                            +`</div>`
-                                                            +`<div class="col-lg-2 p-0">`
-                                                            +`<span class="code_text ml-2"></span>`
-                                                            +`<br/>`                                                            
-                                                            +`<span class="kcode_text ml-2"></span>`
-                                                            +`</div>`
-                                                            +`<div class="col-lg-1 p-0">`
-                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1 ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
-                                                            +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
-                                                            +`</div>`
-                                                            +`</div>`).join(""));
-            }else{
-                s_pages.push("無し");
-                sur_lines_pages.push([]);
-            }           
-            
-        }else{
-            s_pages.push("無し");
-            sur_lines_pages.push([]);
-        }
-        //debug code, for showing all lines of text
-        lines_pages.push(lines);
+    pageNum = 1;
+    numPages = resultItem.normalizedImages.length;
+    $('#page_count').text(numPages);
+    $('#pdf_viewer').css("display","none");
+    $('#image_viewer').css("display","block");
+    if (search_mode == SearchModeEnum.Surgeries){
+        extract_entities_surgeries(resultItem);
+    }else if (search_mode == SearchModeEnum.DPC){
+        extract_entities_dpc(resultItem);
     }
+    display_ocr_image(resultItem);
     $('#page_num').text(pageNum);   
     display_entities();    
     /*if (s_pages.length > 0){
@@ -409,13 +352,20 @@ function display_entities(){
     if (s_pages[pageNum-1]){
         surText = s_pages[pageNum-1]
     }
-    //debug code start, for showing all text
-    var sorted_lines = lines_pages[pageNum-1].sort((a,b) => { 
-        return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
-    });
-    sorted_text = sorted_lines.map(x => x.text);
+    //debug code start, for showing all text 
+    //uncomment this section to show all text
+    //var sorted_lines = lines_pages[pageNum-1].sort((a,b) => { 
+    //    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+    //});
+    //sorted_text = sorted_lines.map(x => x.text);
     //surText = sorted_text;
     //debug code end
+
+    if (search_mode == SearchModeEnum.DPC){
+        $( "#entities_label" ).text("DPC");
+    }else{
+        $( "#entities_label" ).text("手術");
+    }
     var entitiesDiv = $( "#file_entities" );
     entitiesDiv.html(surText);
 }
@@ -489,9 +439,10 @@ function display_ocr_image(resultItem) {
             }
         }
         docImg.off("load");
+        var lines_to_highlight = sur_lines_pages[pageNum-1];
         //debug code, for showing all lines of text        
-        //highlightLines(lines_pages[pageNum-1]);
-        highlightLines(sur_lines_pages[pageNum-1]);
+        //lines_to_highlight = lines_pages[pageNum-1]; //uncomment this line to show all text
+        highlightLines(lines_to_highlight);
     });
 }
 
@@ -509,6 +460,180 @@ function getBoxProperties(boundingBox){
     var width = right - left;
     var height = bottom - top;
     return {"left" : left, "top" : top, "width" : width, "height" : height};
+}
+
+function extract_entities_surgeries(resultItem){
+    s_pages = [];//use as global variable
+    sur_lines_pages = [];//use as global variable
+    sorted_sur_text = [];//use as global variable, for use during edit/correction operation
+    lines_pages = [];//debug code, for showing all lines of text
+    for (var i = 0; i < resultItem.layoutText.length; i++){
+        var lines = resultItem.layoutText[i].lines;
+        var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );        
+        var t_line = [];
+        if(s_line.length > 0){
+            var boxProps = getBoxProperties(s_line[0].boundingBox);
+            var x1 = boxProps.left;
+            var y1 = boxProps.top - 10;
+            t_line = lines.filter(x => { //use filter() to get the boundingboxes (x) that are below 手術(s_line[0]) and in the same column (between leftLimit and rightLimit)
+                var leftLimit =  x1 - 20;
+                var rightLimit = x1 + 30;
+                var topMinimum = y1 + boxProps.height;
+                var left = getBoxProperties(x.boundingBox).left;
+                var top = getBoxProperties(x.boundingBox).top;                
+                return (left > leftLimit && left < rightLimit && top > topMinimum);
+            }).reduce((prev, x) => { //use reduce() to get the topmost boundingbox (x), which is the boundingbox immediately below 手術(s_line[0]) and in the same column
+                if (prev.length == 0){
+                    var arr = [];
+                    arr.push(x);
+                    return arr;
+                }else{
+                    var prevTop = getBoxProperties(prev[0].boundingBox).top;
+                    var xTop = getBoxProperties(x.boundingBox).top;                    
+                    if (prevTop < xTop ){
+                        return prev;
+                    }else{                        
+                        var arr = [];
+                        arr.push(x);
+                        return arr;
+                    }                    
+                }
+            },[]);
+            if (t_line.length > 0){
+                var leftLimit =  x1 + 30;
+                //var rightLimit = x1 + boxProps.width;
+                var topMinimum = y1;
+                var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
+                var topMaximum = t_lineBoxProps.top - 5;
+                var sur_lines = [];
+                sur_lines = lines.filter(x => {                    
+                    var left = getBoxProperties(x.boundingBox).left;
+                    var top = getBoxProperties(x.boundingBox).top;
+                    return (left > leftLimit && top > topMinimum && top < topMaximum); 
+                }).filter(x => !x.text.match(/^[0-9]+$/));
+                sur_lines_pages.push(sur_lines);
+                var sorted_sur_lines = sur_lines.sort((a,b) => { 
+                    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+                });
+                sorted_sur_text = sorted_sur_lines.map(x => x.text);
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                                                            +`<div class="col-lg-5 p-0">`
+                                                            +`<span class="orig_text">${x}</span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-4 p-0">`
+                                                            +`<span class="corrected_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-2 p-0">`
+                                                            +`<span class="code_text ml-2"></span>`
+                                                            +`<br/>`                                                            
+                                                            +`<span class="kcode_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-1 p-0">`
+                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1 ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
+                                                            +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
+                                                            +`</div>`
+                                                            +`</div>`).join(""));
+            }else{
+                s_pages.push("無し");
+                sur_lines_pages.push([]);
+            }           
+            
+        }else{
+            s_pages.push("無し");
+            sur_lines_pages.push([]);
+        }
+        //debug code, for showing all lines of text
+        //lines_pages.push(lines);//uncomment this line to show all text
+    }
+}
+
+function extract_entities_dpc(resultItem){
+    s_pages = [];//use as global variable
+    sur_lines_pages = [];//use as global variable
+    sorted_sur_text = [];//use as global variable, for use during edit/correction operation
+    lines_pages = [];//debug code, for showing all lines of text
+    for (var i = 0; i < resultItem.layoutText.length; i++){
+        var lines = resultItem.layoutText[i].lines;        
+        var s_line = lines.filter(x => x.text.match(/^DPC$/) || x.text.match(/^.*DPC$/) || x.text.match(/^DPC.*$/) );
+        var t_line = [];
+        if(s_line.length > 0){
+            var boxProps = getBoxProperties(s_line[0].boundingBox);
+            var x1 = boxProps.left;
+            var y1 = boxProps.top - 10;
+            t_line = lines.filter(x => {//use filter() to get the boundingboxes (x) that are below DPC(s_line[0]) and in the same column (between leftLimit and rightLimit)
+                var leftLimit =  x1 - 20;
+                var rightLimit = x1 + 30;
+                var topMinimum = y1 + boxProps.height;
+                var left = getBoxProperties(x.boundingBox).left;
+                var top = getBoxProperties(x.boundingBox).top;
+                if (x.text.match(/^DPC$/) || x.text.match(/^.*DPC$/) || x.text.match(/^DPC.*$/)){
+                    return false;
+                }else{
+                    return (left > leftLimit && left < rightLimit && top > topMinimum); 
+                }                
+            }).reduce((prev, x) => {               
+                if (prev.length == 0){
+                    var arr = [];
+                    arr.push(x);
+                    return arr;
+                }else{
+                    var prevTop = getBoxProperties(prev[0].boundingBox).top;
+                    var xTop = getBoxProperties(x.boundingBox).top;                    
+                    if (prevTop < xTop ){
+                        return prev;
+                    }else{                        
+                        var arr = [];
+                        arr.push(x);
+                        return arr;
+                    }                    
+                }
+            },[]);
+            if (t_line.length > 0){
+                var leftLimit =  x1 + 30;
+                //var rightLimit = x1 + boxProps.width;
+                var topMinimum = y1;
+                var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
+                var topMaximum = t_lineBoxProps.top - 5;
+                var sur_lines = [];
+                sur_lines = lines.filter(x => {                    
+                    var left = getBoxProperties(x.boundingBox).left;
+                    var top = getBoxProperties(x.boundingBox).top;
+                    return (left > leftLimit && top > topMinimum && top < topMaximum); 
+                });
+                sur_lines_pages.push(sur_lines);
+                var sorted_sur_lines = sur_lines.sort((a,b) => { 
+                    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+                });
+                sorted_sur_text = sorted_sur_lines.map(x => x.text);
+                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                                                            +`<div class="col-lg-5 p-0">`
+                                                            +`<span class="orig_text">${x}</span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-4 p-0">`
+                                                            +`<span class="corrected_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-2 p-0">`
+                                                            +`<span class="code_text ml-2"></span>`
+                                                            +`<br/>`                                                            
+                                                            +`<span class="kcode_text ml-2"></span>`
+                                                            +`</div>`
+                                                            +`<div class="col-lg-1 p-0">`
+                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1 ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
+                                                            +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
+                                                            +`</div>`
+                                                            +`</div>`).join(""));
+            }else{
+                s_pages.push("無し");
+                sur_lines_pages.push([]);
+            }           
+            
+        }else{
+            s_pages.push("無し");
+            sur_lines_pages.push([]);
+        }
+        //debug code, for showing all lines of text
+        //lines_pages.push(lines);//uncomment this line to show all text
+    }
 }
 
 function getWikipediaLinksHtml(array){
