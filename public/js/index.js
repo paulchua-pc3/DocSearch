@@ -30,13 +30,7 @@ var search_mode = SearchModeEnum.Standard;
 /**pdf viewer start */
 var pdfDoc = null,
         pageNum = 1,
-        pageRendering = false,
-        pageNumPending = null,
-        scale = 1.0,
-        canvas = null,
-        ctx = null,
-        pdfjsLib = null;
-var numPages = 0;
+        numPages = 0;
 /**pdf viewer end */
 
 $( document ).ready( function() {
@@ -95,16 +89,6 @@ $( document ).ready( function() {
     })
 
     /**pdf viewer start */
-    pdfjsLib = window['pdfjs-dist/build/pdf'];
-
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.worker.js';
-    
-    // can't get sizing to work when using jquery selectors, so comment for now
-    //canvas = $('#the-canvas');
-    //ctx = canvas.get(0).getContext('2d');
-    canvas = document.getElementById('the-canvas'),    
-    ctx = canvas.getContext('2d');    
-
     $('#prev').click(onPrevPage);
     $('#next').click(onNextPage);
     /**pdf viewer end */
@@ -514,7 +498,7 @@ function extract_entities_surgeries(resultItem){
                 sur_lines_pages.push(sur_lines);
                 var sorted_sur_lines = sur_lines.sort((a,b) => { 
                     return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
-                });
+                });                
                 sorted_sur_text = sorted_sur_lines.map(x => x.text);
                 s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
                                                             +`<div class="col-lg-5 p-0">`
@@ -594,17 +578,15 @@ function extract_entities_dpc(resultItem){
                 var topMinimum = y1;
                 var t_lineBoxProps = getBoxProperties(t_line[0].boundingBox);
                 var topMaximum = t_lineBoxProps.top - 5;
-                var sur_lines = [];
-                sur_lines = lines.filter(x => {                    
+                var dpc_lines = [];
+                dpc_lines = lines.filter(x => {                    
                     var left = getBoxProperties(x.boundingBox).left;
                     var top = getBoxProperties(x.boundingBox).top;
                     return (left > leftLimit && top > topMinimum && top < topMaximum); 
                 });
-                sur_lines_pages.push(sur_lines);
-                var sorted_sur_lines = sur_lines.sort((a,b) => { 
-                    return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
-                });
-                sorted_sur_text = sorted_sur_lines.map(x => x.text);
+                sur_lines_pages.push(dpc_lines);
+                var dpc_lines_rows = getDpcEntriesFromOcrLines(dpc_lines);
+                sorted_sur_text = dpc_lines_rows.map(x => x.text);                
                 s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
                                                             +`<div class="col-lg-5 p-0">`
                                                             +`<span class="orig_text">${x}</span>`
@@ -636,6 +618,46 @@ function extract_entities_dpc(resultItem){
     }
 }
 
+function getDpcEntriesFromOcrLines(lines){
+    //sort by vertical position - topmost first
+    var sorted_lines = lines.sort((a,b) => { 
+        return getBoxProperties(a.boundingBox).top - getBoxProperties(b.boundingBox).top;
+    });
+    //get dpc entries
+    var resultEntries = [];
+    var isEntryStarted = false;
+    var entry = [];
+    for (var i = 0; i < sorted_lines.length; i++){
+        var text = sorted_lines[i].text;
+        if (text.match(/入院/)){
+            if (isEntryStarted){
+                resultEntries.push(entry);
+                entry = [];
+                entry.push(lines[i]);
+            }else{
+                isEntryStarted = true;
+                entry.push(lines[i]);
+            }
+        }else{
+            if (text.match(/[0-9]+/)){
+                entry.push(lines[i]);
+            }else{
+                if (entry.length > 0){
+                    resultEntries.push(entry);
+                    entry = [];
+                }
+            }
+        }
+
+        if (i == sorted_lines.length-1){
+            if (entry.length > 0){
+                resultEntries.push(entry);
+            }
+        }
+    }    
+    return resultEntries;
+}
+
 function getWikipediaLinksHtml(array){
     return array.reduce(function(accumulator, item, index){
         //add leading comma only after first item
@@ -649,44 +671,6 @@ function getWikipediaLinksHtml(array){
 }
 
 /**pdf viewer start */
-
-/**
- * Get page info from document, resize canvas accordingly, and render page.
- * @param num Page number.
- */
-function renderPage(num) {
-    pageRendering = true;
-    // Using promise to fetch the page
-    pdfDoc.getPage(num).then(function(page) {
-        var viewport = page.getViewport({scale: scale});
-        // can't get sizing to work when using jquery selectors, so comment for now
-        //canvas.css("height", viewport.height);
-        //canvas.css("width", viewport.width);
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;    
-
-        // Render PDF page into canvas context
-        var renderContext = {
-            canvasContext: ctx,
-            viewport: viewport
-        };
-        var renderTask = page.render(renderContext);
-
-        // Wait for rendering to finish
-        renderTask.promise.then(function() {
-            pageRendering = false;
-            if (pageNumPending !== null) {
-            // New page rendering is pending
-            renderPage(pageNumPending);
-            pageNumPending = null;
-            }
-        });
-    });
-
-    // Update page counters
-    $('#page_num').text(num);
-}
-
 
 /**
  * Displays previous page.
