@@ -586,22 +586,18 @@ function extract_entities_dpc(resultItem){
                 });
                 sur_lines_pages.push(dpc_lines);
                 var dpc_lines_rows = getDpcEntriesFromOcrLines(dpc_lines);
-                sorted_sur_text = dpc_lines_rows.map(x => x.text);                
-                s_pages.push(sorted_sur_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                sorted_dpc_text = dpc_lines_rows.map(x => x.map(y => y.text));                
+                s_pages.push(sorted_dpc_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
                                                             +`<div class="col-lg-5 p-0">`
-                                                            +`<span class="orig_text">${x}</span>`
+                                                            +`<span>${x[0]}</span>`
                                                             +`</div>`
                                                             +`<div class="col-lg-4 p-0">`
-                                                            +`<span class="corrected_text ml-2"></span>`
+                                                            + (x[1]?`<span class="ml-2">${x[1]}</span>`:"")
                                                             +`</div>`
-                                                            +`<div class="col-lg-2 p-0">`
-                                                            +`<span class="code_text ml-2"></span>`
-                                                            +`<br/>`                                                            
-                                                            +`<span class="kcode_text ml-2"></span>`
+                                                            +`<div class="col-lg-2 p-0">`                                                                                                   
+                                                            + (x[2]?`<span class="ml-2">${x[2]}</span>`:"")
                                                             +`</div>`
-                                                            +`<div class="col-lg-1 p-0">`
-                                                            +`<i id="sur_icon_${idx}" class="fa fa-search sur_edit pl-1 ml-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="display:none"></i>`
-                                                            +`<div class="dropdown-menu" aria-labelledby="sur_icon_${idx}"> </div>`
+                                                            +`<div class="col-lg-1 p-0">`                                                            
                                                             +`</div>`
                                                             +`</div>`).join(""));
             }else{
@@ -639,13 +635,14 @@ function getDpcEntriesFromOcrLines(lines){
                 entry.push(lines[i]);
             }
         }else{
-            if (text.match(/[0-9]+/)){
+            if (isEntryStarted && text.match(/[0-9]+/)){
                 entry.push(lines[i]);
             }else{
                 if (entry.length > 0){
                     resultEntries.push(entry);
                     entry = [];
                 }
+                isEntryStarted = false;
             }
         }
 
