@@ -82,7 +82,7 @@ class SearchClient {
     //api call to run search, returns response body
     exec_search(query, filter) {
 
-        var url = `https://${this.searchServiceName}.search.windows.net/indexes/${this.indexName}/docs?api-version=${this.apiVersion}&queryType=simple&searchMode=all&highlight=mergedText&$count=true&search=`;
+        var url = `https://${this.searchServiceName}.search.windows.net/indexes/${this.indexName}/docs?api-version=${this.apiVersion}&queryType=simple&searchMode=any&highlight=mergedText&$count=true&search=`;
         
         var query_encoded = encodeURIComponent(query);
         

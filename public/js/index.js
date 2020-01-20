@@ -119,7 +119,7 @@ function execute_search(event){
         }else if (currentTarget == "dpc_search"){
             search_mode = SearchModeEnum.DPC;
             //use predefined query for DPC/入院
-            query = "DPC";
+            query = "DPC 包括";
         }        
 
     }else{
@@ -536,9 +536,10 @@ function extract_entities_dpc(resultItem){
     sur_lines_pages = [];//use as global variable
     sorted_sur_text = [];//use as global variable, for use during edit/correction operation
     lines_pages = [];//debug code, for showing all lines of text
-    for (var i = 0; i < resultItem.layoutText.length; i++){
-        var lines = resultItem.layoutText[i].lines;        
-        var s_line = lines.filter(x => x.text.match(/^DPC$/) || x.text.match(/^.*DPC$/) || x.text.match(/^DPC.*$/) );
+    for (var i = 0; i < resultItem.layoutText.length; i++){//iterate per page of document (1 layoutText -> 1 page)
+        var lines = resultItem.layoutText[i].lines;
+        // extract dpc entries start
+        var s_line = lines.filter(x => x.text.match(/^DPC$/) || x.text.match(/^.*DPC$/) || x.text.match(/^DPC.*$/) || x.text.match(/^包括$/) || x.text.match(/^.*包括$/) || x.text.match(/^包括.*$/) );
         var t_line = [];
         if(s_line.length > 0){
             var boxProps = getBoxProperties(s_line[0].boundingBox);
@@ -586,8 +587,22 @@ function extract_entities_dpc(resultItem){
                 });
                 sur_lines_pages.push(dpc_lines);
                 var dpc_lines_rows = getDpcEntriesFromOcrLines(dpc_lines);
-                sorted_dpc_text = dpc_lines_rows.map(x => x.map(y => y.text));                
-                s_pages.push(sorted_dpc_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                sorted_dpc_text = dpc_lines_rows.map(x => x.map(y => y.text));
+                var dpc_label_row_text = `<div class="row no-gutters">`
+                                    +`<div class="col-lg-5 p-0">`
+                                    +`<span>項目名</span>`
+                                    +`</div>`
+                                    +`<div class="col-lg-4 p-0">`
+                                    + `<span class="ml-2">単価点数</span>`
+                                    +`</div>`
+                                    +`<div class="col-lg-2 p-0">`                                                                                                   
+                                    + `<span class="ml-2">合計</span>`
+                                    +`</div>`
+                                    +`<div class="col-lg-1 p-0">`                                                            
+                                    +`</div>`
+                                    +`</div>`;
+                s_pages.push(dpc_label_row_text
+                             + sorted_dpc_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
                                                             +`<div class="col-lg-5 p-0">`
                                                             +`<span>${x[0]}</span>`
                                                             +`</div>`
@@ -609,6 +624,20 @@ function extract_entities_dpc(resultItem){
             s_pages.push("無し");
             sur_lines_pages.push([]);
         }
+        // extract dpc entries end
+
+        // extract date start
+        var date_label_line = lines.filter(x => x.text.match(/受([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){1}期/));
+        let date_text;
+        if (date_label_line.length > 0){
+            var date_label_text = date_label_line[0].text;
+            var date_match = date_label_text.match(/([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){2}[0-9]+年.+月.+日.+年.+月.+日/)
+            if (date_match){
+               date_text = date_match[0];
+            }
+        };
+        // extract date end
+
         //debug code, for showing all lines of text
         //lines_pages.push(lines);//uncomment this line to show all text
     }
