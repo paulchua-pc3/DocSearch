@@ -15,6 +15,9 @@ var s_pages = [];
 //sorted 手術 text; used first in display_file
 var sorted_sur_text = [];
 
+//date text of 受診期間; used first in extract_entities_dpc
+var date_text = "";
+
 //debug code, for showing all lines of text
 var lines_pages = [];
 
@@ -102,6 +105,7 @@ $( document ).ready( function() {
     $('#export-btn').click(exportButtonOnClick);
     /**edit mode end*/
 
+    $('#display_buttons input').change(toggleOCRDisplay);
 });
 
 function execute_search(event){
@@ -526,8 +530,8 @@ function extract_entities_surgeries(resultItem){
             s_pages.push("無し");
             sur_lines_pages.push([]);
         }
-        //debug code, for showing all lines of text
-        //lines_pages.push(lines);//uncomment this line to show all text
+        // for showing all lines of text with the display toggle button
+        lines_pages.push(lines);
     }
 }
 
@@ -555,22 +559,22 @@ function extract_entities_dpc(resultItem){
                     return false;
                 }else{
                     return (left > leftLimit && left < rightLimit && top > topMinimum); 
-                }                
-            }).reduce((prev, x) => {               
+                }
+            }).reduce((prev, x) => {//use reduce() to get the topmost boundingbox (x with smallest value of .top)
                 if (prev.length == 0){
                     var arr = [];
                     arr.push(x);
                     return arr;
                 }else{
                     var prevTop = getBoxProperties(prev[0].boundingBox).top;
-                    var xTop = getBoxProperties(x.boundingBox).top;                    
+                    var xTop = getBoxProperties(x.boundingBox).top;
                     if (prevTop < xTop ){
                         return prev;
-                    }else{                        
+                    }else{
                         var arr = [];
                         arr.push(x);
                         return arr;
-                    }                    
+                    }
                 }
             },[]);
             if (t_line.length > 0){
@@ -631,15 +635,22 @@ function extract_entities_dpc(resultItem){
         let date_text;
         if (date_label_line.length > 0){
             var date_label_text = date_label_line[0].text;
+            // check if date text is already included in the date_label line/bounding box
             var date_match = date_label_text.match(/([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){2}[0-9]+年.+月.+日.+年.+月.+日/)
             if (date_match){
                date_text = date_match[0];
+            }else{
+                // get the bounding box to the right of date_label_line
+                var boxProps = getBoxProperties(date_label_line[0].boundingBox);
+                var leftLimit = boxProps.left + boxProps.width;
+                var topMinimum = boxProps.top - 10;
+                // TODO: filter lines using leftLimit, topMinimum
             }
         };
         // extract date end
 
-        //debug code, for showing all lines of text
-        //lines_pages.push(lines);//uncomment this line to show all text
+        // for showing all lines of text with the display toggle button
+        lines_pages.push(lines);
     }
 }
 
@@ -872,4 +883,16 @@ function exportButtonOnClick(){
         }
     });
 
+}
+
+function toggleOCRDisplay(event){
+    //clear all ocr highlight boxes first
+    $(".box.act").remove();    
+    // for showing all lines of text
+    var lines_to_highlight = lines_pages[pageNum-1];
+    if ( event.currentTarget.id == "option_display_specific"){
+        // for showing only surgeries or dpc lines of text
+        lines_to_highlight = sur_lines_pages[pageNum-1];
+    }    
+    highlightLines(lines_to_highlight);
 }

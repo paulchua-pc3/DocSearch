@@ -184,8 +184,17 @@
 									<div>
 											<button id="prev">前へ</button>
 											<button id="next">次へ</button>
-											&nbsp; &nbsp;
+											&nbsp;&nbsp;
 											<span>ページ: <span id="page_num"></span> / <span id="page_count"></span></span>
+											&nbsp;&nbsp;
+											<div class="btn-group btn-group-sm btn-group-toggle" id="display_buttons" data-toggle="buttons">
+												<label class="btn btn-primary active" id="label_display_specific">
+													<input type="radio" name="options_display" id="option_display_specific" autocomplete="off"> 特定表示
+												</label>
+												<label class="btn btn-primary"  id="label_display_all">
+													<input type="radio" name="options_display" id="option_display_all" autocomplete="off"> 全表示
+												</label>
+											</div>
 									</div>
 									<div class="over" id="image_viewer" style="width: 100%; height: 85vh; overflow: scroll;">
 										<div id="image_wrapper" class="content_wrapper" style="position: relative; height: 98%;">
@@ -198,7 +207,7 @@
 											<button id="prev">前へ</button>
 											<button id="next">次へ</button>
 											&nbsp; &nbsp;
-											<span>ページ: <span id="page_num"></span> / <span id="page_count"></span></span>
+											<span>ページ: <span id="page_num"></span> / <span id="page_count"></span></span>											
 										</div>
 										<canvas id="the-canvas"></canvas>
 									</div>
