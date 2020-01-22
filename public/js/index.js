@@ -18,6 +18,9 @@ var sorted_sur_text = [];
 //date text of 受診期間; used first in extract_entities_dpc
 var date_text = "";
 
+//text of 診療科; used first in extract_entities_dpc
+var med_spec_text = "";
+
 //debug code, for showing all lines of text
 var lines_pages = [];
 
@@ -351,6 +354,9 @@ function display_entities(){
 
     if (search_mode == SearchModeEnum.DPC){
         $( "#entities_label" ).text("DPC");
+        surText += date_text;
+        surText += med_spec_text;
+
     }else{
         $( "#entities_label" ).text("手術");
     }
@@ -454,7 +460,7 @@ function extract_entities_surgeries(resultItem){
     s_pages = [];//use as global variable
     sur_lines_pages = [];//use as global variable
     sorted_sur_text = [];//use as global variable, for use during edit/correction operation
-    lines_pages = [];//debug code, for showing all lines of text
+    lines_pages = [];// for showing all lines of text
     for (var i = 0; i < resultItem.layoutText.length; i++){
         var lines = resultItem.layoutText[i].lines;
         var s_line = lines.filter(x => x.text.match(/^手術$/) || x.text.match(/^手術料$/) || x.text.match(/^手術ト.*$/) );        
@@ -539,7 +545,9 @@ function extract_entities_dpc(resultItem){
     s_pages = [];//use as global variable
     sur_lines_pages = [];//use as global variable
     sorted_sur_text = [];//use as global variable, for use during edit/correction operation
-    lines_pages = [];//debug code, for showing all lines of text
+    lines_pages = [];// for showing all lines of text
+    date_text = "";
+    med_spec_text = "";
     for (var i = 0; i < resultItem.layoutText.length; i++){//iterate per page of document (1 layoutText -> 1 page)
         var lines = resultItem.layoutText[i].lines;
         // extract dpc entries start
@@ -632,13 +640,14 @@ function extract_entities_dpc(resultItem){
 
         // extract date start
         var date_label_line = lines.filter(x => x.text.match(/受([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){1}期/));
-        let date_text;
         if (date_label_line.length > 0){
             var date_label_text = date_label_line[0].text;
             // check if date text is already included in the date_label line/bounding box
             var date_match = date_label_text.match(/([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){2}[0-9]+年.+月.+日.+年.+月.+日/)
             if (date_match){
-               date_text = date_match[0];
+               date_text ='<br/><div><span>受診期間：'
+                         + date_match[0]
+                         + '</span></div>';
             }else{
                 // get the bounding box to the right of date_label_line
                 var boxProps = getBoxProperties(date_label_line[0].boundingBox);
@@ -648,6 +657,26 @@ function extract_entities_dpc(resultItem){
             }
         };
         // extract date end
+
+        // extract medical specialty start
+        var med_spec_label_line = lines.filter(x => x.text.match(/療科/));
+        if (med_spec_label_line.length > 0){
+            var med_spec_label_text = med_spec_label_line[0].text;
+            // check if medical specialty text is already included in the med_spec_label line/bounding box
+            var med_spec_match = med_spec_label_text.match(/療科(([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf])+)$/)
+            if (med_spec_match){
+                med_spec_text ='<br/><div><span>診療科：'
+                         + med_spec_match[1]
+                         + '</span></div>';
+            }else{
+                // get the bounding box to the right of date_label_line
+                var boxProps = getBoxProperties(med_spec_label_line[0].boundingBox);
+                var leftLimit = boxProps.left + boxProps.width;
+                var topMinimum = boxProps.top - 10;
+                // TODO: filter lines using leftLimit, topMinimum
+            }
+        };
+        // extract medical specialty end
 
         // for showing all lines of text with the display toggle button
         lines_pages.push(lines);
