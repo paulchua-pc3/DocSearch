@@ -354,8 +354,7 @@ function display_entities(){
 
     if (search_mode == SearchModeEnum.DPC){
         $( "#entities_label" ).text("DPC");
-        surText += date_text;
-        surText += med_spec_text;
+        surText = date_text + '<br/>' + med_spec_text + '<br/>' + surText;
 
     }else{
         $( "#entities_label" ).text("手術");
@@ -645,7 +644,7 @@ function extract_entities_dpc(resultItem){
             // check if date text is already included in the date_label line/bounding box
             var date_match = date_label_text.match(/([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]){2}[0-9]+年.+月.+日.+年.+月.+日/)
             if (date_match){
-               date_text ='<br/><div><span>受診期間：'
+               date_text ='<div><span>受診期間：'
                          + date_match[0]
                          + '</span></div>';
             }else{
@@ -665,7 +664,7 @@ function extract_entities_dpc(resultItem){
             // check if medical specialty text is already included in the med_spec_label line/bounding box
             var med_spec_match = med_spec_label_text.match(/療科(([\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf])+)$/)
             if (med_spec_match){
-                med_spec_text ='<br/><div><span>診療科：'
+                med_spec_text ='<div><span>診療科：'
                          + med_spec_match[1]
                          + '</span></div>';
             }else{
