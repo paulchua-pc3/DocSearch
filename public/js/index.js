@@ -603,8 +603,11 @@ function extract_entities_dpc(resultItem){
                                     +`<div class="col-lg-5 p-0">`
                                     +`<span>項目名</span>`
                                     +`</div>`
-                                    +`<div class="col-lg-4 p-0">`
+                                    +`<div class="col-lg-3 p-0">`
                                     + `<span class="ml-2">単価点数</span>`
+                                    +`</div>`
+                                    +`<div class="col-lg-1 p-0">`
+                                    + `<span class="ml-2">回数</span>`
                                     +`</div>`
                                     +`<div class="col-lg-2 p-0">`                                                                                                   
                                     + `<span class="ml-2">合計</span>`
@@ -613,19 +616,41 @@ function extract_entities_dpc(resultItem){
                                     +`</div>`
                                     +`</div>`;
                 s_pages.push(dpc_label_row_text
-                             + sorted_dpc_text.map((x, idx) => `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
+                             + sorted_dpc_text.map((x, idx) => {
+                                                            let no_of_times, unit_price, total;                                                             
+                                                            if(x[1]){
+                                                                var unit_price_match = x[1].match(/[0-9]+/);
+                                                                if (unit_price_match){
+                                                                    unit_price=unit_price_match[0];
+                                                                }
+                                                            }
+                                                            if(x[2]){
+                                                                var total_match = x[2].match(/[0-9]+\.[0-9]+/);
+                                                                if (total_match){
+                                                                    total=total_match[0].replace(".","");
+                                                                }
+                                                                if (unit_price && total){
+                                                                    no_of_times = parseInt(total) / parseInt(unit_price);
+                                                                }
+                                                            }
+
+                                                            return `<div id="sur_${idx}" class="sur_drop dropright row no-gutters">`
                                                             +`<div class="col-lg-5 p-0">`
                                                             +`<span>${x[0]}</span>`
                                                             +`</div>`
-                                                            +`<div class="col-lg-4 p-0">`
-                                                            + (x[1]?`<span class="ml-2">${x[1]}</span>`:"")
+                                                            +`<div class="col-lg-3 p-0">`
+                                                            + (unit_price?`<span class="ml-2">${unit_price}</span>`:"")
+                                                            +`</div>`
+                                                            +`<div class="col-lg-1 p-0">`                                                                                                   
+                                                            + (no_of_times?`<span class="ml-2">${no_of_times}</span>`:"")
                                                             +`</div>`
                                                             +`<div class="col-lg-2 p-0">`                                                                                                   
-                                                            + (x[2]?`<span class="ml-2">${x[2]}</span>`:"")
+                                                            + (total?`<span class="ml-2">${total}</span>`:"")
                                                             +`</div>`
                                                             +`<div class="col-lg-1 p-0">`                                                            
                                                             +`</div>`
-                                                            +`</div>`).join(""));
+                                                            +`</div>`
+                                                        }).join(""));
             }else{
                 s_pages.push("無し");
                 sur_lines_pages.push([]);
