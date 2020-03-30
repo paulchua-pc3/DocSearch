@@ -5,7 +5,7 @@
 	"watson_classify": {
 		"url": "https://gateway-tok.watsonplatform.net/assistant/api",
 		"version": "2019-02-28",
-		"apikey": "G4oSvE2asYoXPbrUDcgfux1h7jjNX1ut9gSu85LdWSiO",
-		"workspace_id":"f039e75d-8e32-46b1-8776-6f817c4ea278"			
+		"apikey": "SUEsyO5v_G9WEyldqt8qLEHOgmDdO5Hxpo6GsLArn6Vs",
+		"workspace_id":"442af1d4-ee74-47f0-87ba-1ffc6c36d290"			
 	}
 }
